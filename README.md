@@ -5,6 +5,47 @@ An AI-powered Blood Donor Finder and Donation Analytics System developed using F
 This project helps users quickly find suitable blood donors based on blood group and location while providing AI-based donor recommendation and eligibility prediction.
 
 ---
+# 📸 Project Screenshots
+
+## 🏠 Home Page
+![Home Page](screenshots/home.png)
+
+---
+
+## 🔐 User Login
+![User Login](screenshots/login.png)
+
+---
+
+## 🩸 Donor Registration
+![Donor Registration](screenshots/register.png)
+
+---
+
+## 🔍 Find Donor
+![Find Donor](screenshots/find_donor.png)
+
+---
+
+## 🧠 Eligibility Prediction
+![Eligibility](screenshots/eligibility.png)
+
+---
+
+## 👨‍💼 Admin Dashboard
+![Admin Dashboard](screenshots/dashboard.png)
+
+---
+
+## 📊 Analytics Dashboard - Overview
+![Analytics 1](screenshots/analytics1.png)
+
+---
+
+## 📈 Analytics Dashboard - Reports
+![Analytics 2](screenshots/analytics2.png)
+
+---
 
 # 🚀 Features
 
