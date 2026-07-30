@@ -1,0 +1,650 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile — LifeLink{% endblock %}
+
+{% block extra_css %}
+<style>
+  .profile-page {
+    background: var(--off-white);
+    min-height: 80vh;
+    padding: 2.5rem 0;
+  }
+
+  /* Profile Header Card */
+  .profile-header-card {
+    background: linear-gradient(135deg, #C0152A 0%, #E63946 100%);
+    border-radius: var(--radius-lg);
+    padding: 2rem 2.5rem;
+    color: #fff;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .profile-header-card::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+  }
+
+  .profile-avatar-lg {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    border: 3px solid rgba(255,255,255,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .profile-header-card h2 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+  }
+
+  .profile-header-card p {
+    color: rgba(255,255,255,0.8);
+    font-size: 0.88rem;
+    margin: 0;
+  }
+
+  .profile-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: var(--radius-pill);
+    padding: 0.25rem 0.85rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #fff;
+    margin-top: 0.5rem;
+  }
+
+  /* Tabs */
+  .profile-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--gray-200);
+    padding-bottom: 0;
+  }
+
+  .profile-tab {
+    padding: 0.6rem 1.25rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--gray-500);
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color var(--transition), border-color var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-decoration: none;
+  }
+
+  .profile-tab:hover { color: var(--red-deep); }
+
+  .profile-tab.active {
+    color: var(--red-deep);
+    border-bottom-color: var(--red-deep);
+  }
+
+  /* Section Card */
+  .profile-section-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    padding: 1.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .profile-section-card h5 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--gray-900);
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .profile-section-card h5 i { color: var(--red-deep); }
+
+  /* Info row */
+  .info-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid var(--gray-100);
+    font-size: 0.88rem;
+  }
+
+  .info-row:last-child { border-bottom: none; }
+
+  .info-row .info-label {
+    width: 140px;
+    font-weight: 600;
+    color: var(--gray-500);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+    padding-top: 1px;
+  }
+
+  .info-row .info-value {
+    color: var(--gray-900);
+    font-weight: 500;
+  }
+
+  /* Edit Form */
+  .profile-form .form-label {
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: var(--gray-700);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .profile-form .form-control,
+  .profile-form .form-select {
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    padding: 0.6rem 0.9rem;
+    font-size: 0.9rem;
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+
+  .profile-form .form-control:focus,
+  .profile-form .form-select:focus {
+    border-color: var(--red-deep);
+    box-shadow: 0 0 0 3px rgba(192,21,42,0.1);
+  }
+
+  .btn-save-profile {
+    background: var(--red-deep);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 0.65rem 2rem;
+    font-weight: 700;
+    font-size: 0.92rem;
+    transition: background var(--transition), transform var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .btn-save-profile:hover {
+    background: var(--red-mid);
+    transform: translateY(-1px);
+    color: #fff;
+  }
+
+  /* Donor status card */
+  .donor-status-card {
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .donor-status-card.registered {
+    background: #ECFDF5;
+    border: 1.5px solid #1A7A4A;
+  }
+
+  .donor-status-card.not-registered {
+    background: var(--red-light);
+    border: 1.5px dashed var(--red-deep);
+  }
+
+  .donor-status-icon {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+
+  .donor-status-card.registered .donor-status-icon {
+    background: #1A7A4A;
+    color: #fff;
+  }
+
+  .donor-status-card.not-registered .donor-status-icon {
+    background: var(--red-deep);
+    color: #fff;
+  }
+
+  /* Blood group badge */
+  .blood-badge-lg {
+    display: inline-block;
+    background: var(--red-deep);
+    color: #fff;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+    border-radius: var(--radius-pill);
+    padding: 0.3rem 1rem;
+  }
+
+  /* Request status badges */
+  .req-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    border-radius: var(--radius-pill);
+    padding: 0.2rem 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .req-badge.pending   { background:#FEF3C7; color:#92400E; }
+  .req-badge.approved  { background:#ECFDF5; color:#1A7A4A; }
+  .req-badge.completed { background:#EFF6FF; color:#1D4ED8; }
+  .req-badge.rejected  { background:var(--red-light); color:var(--red-deep); }
+
+  /* Request table */
+  .req-table { width:100%; border-collapse:collapse; }
+  .req-table th {
+    padding: 0.65rem 0.9rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+    background: var(--gray-900);
+    white-space: nowrap;
+  }
+  .req-table td {
+    padding: 0.75rem 0.9rem;
+    font-size: 0.85rem;
+    color: var(--gray-700);
+    border-bottom: 1px solid var(--gray-100);
+    vertical-align: middle;
+  }
+  .req-table tbody tr:last-child td { border-bottom: none; }
+  .req-table tbody tr:hover { background: var(--off-white); }
+
+  /* No data */
+  .no-data {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--gray-500);
+  }
+
+  .no-data i {
+    font-size: 2.5rem;
+    color: var(--gray-300);
+    display: block;
+    margin-bottom: 0.75rem;
+  }
+
+  .no-data p { font-size: 0.9rem; margin: 0; }
+
+  .btn-outline-red {
+    border: 2px solid var(--red-deep);
+    color: var(--red-deep);
+    background: transparent;
+    border-radius: var(--radius-pill);
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    font-size: 0.88rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all var(--transition);
+    text-decoration: none;
+  }
+
+  .btn-outline-red:hover {
+    background: var(--red-deep);
+    color: #fff;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+  <div class="container">
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show mb-3" role="alert">
+            <i class="bi bi-{{ 'check-circle-fill' if category == 'success' else 'exclamation-triangle-fill' }} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- Profile Header -->
+    <div class="profile-header-card">
+      <div class="d-flex align-items-center gap-3">
+        <div class="profile-avatar-lg">
+          {{ (user.full_name or user.username)[0] | upper }}
+        </div>
+        <div style="position:relative; z-index:1;">
+          <h2>{{ user.full_name or user.username }}</h2>
+          <p>@{{ user.username }} &nbsp;•&nbsp; {{ user.email }}</p>
+          <div class="d-flex gap-2 flex-wrap mt-1">
+            <span class="profile-tag">
+              <i class="bi bi-person-check-fill"></i> LifeLink Member
+            </span>
+            {% if donor %}
+            <span class="profile-tag">
+              <i class="bi bi-droplet-fill"></i> {{ donor.blood_group }} Donor
+            </span>
+            {% endif %}
+            <span class="profile-tag">
+              <i class="bi bi-calendar3"></i>
+              Joined {{ user.created_at[:10] if user.created_at else 'N/A' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+
+      <!-- Left Column -->
+      <div class="col-lg-4">
+
+        <!-- Donor Status -->
+        <div class="profile-section-card">
+          <h5><i class="bi bi-droplet-half"></i> Donor Status</h5>
+
+          {% if donor %}
+          <div class="donor-status-card registered">
+            <div class="donor-status-icon">
+              <i class="bi bi-check-lg"></i>
+            </div>
+            <div>
+              <div style="font-weight:700; color:#1A7A4A; font-size:0.95rem;">
+                Registered Donor ✅
+              </div>
+              <div style="font-size:0.82rem; color:var(--gray-700); margin-top:0.2rem;">
+                Blood Group: <span class="blood-badge-lg ms-1">{{ donor.blood_group }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3">
+            <div class="info-row">
+              <span class="info-label">City</span>
+              <span class="info-value">{{ donor.city }}{% if donor.state %}, {{ donor.state }}{% endif %}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Weight</span>
+              <span class="info-value">{{ donor.weight }} kg</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Last Donated</span>
+              <span class="info-value">{{ donor.last_donated or 'Never' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Available</span>
+              <span class="info-value">
+                {% if donor.is_available %}
+                  <span style="color:#1A7A4A; font-weight:600;">✅ Yes</span>
+                {% else %}
+                  <span style="color:var(--red-deep); font-weight:600;">❌ No</span>
+                {% endif %}
+              </span>
+            </div>
+          </div>
+
+          {% else %}
+          <div class="donor-status-card not-registered">
+            <div class="donor-status-icon">
+              <i class="bi bi-person-dash"></i>
+            </div>
+            <div>
+              <div style="font-weight:700; color:var(--red-deep); font-size:0.9rem;">
+                Not Registered as Donor
+              </div>
+              <div style="font-size:0.8rem; color:var(--gray-700); margin-top:0.2rem;">
+                Register to start saving lives!
+              </div>
+            </div>
+          </div>
+          <div class="mt-3 text-center">
+            <a href="{{ url_for('register') }}" class="btn-outline-red">
+              <i class="bi bi-droplet-half"></i> Register as Donor
+            </a>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Quick Links -->
+        <div class="profile-section-card">
+          <h5><i class="bi bi-lightning-fill"></i> Quick Actions</h5>
+          <div class="d-flex flex-column gap-2">
+            <a href="{{ url_for('search_donor') }}" class="btn-outline-red">
+              <i class="bi bi-search-heart"></i> Find a Donor
+            </a>
+            <a href="{{ url_for('eligibility') }}" class="btn-outline-red">
+              <i class="bi bi-clipboard2-pulse"></i> Check Eligibility
+            </a>
+            <a href="{{ url_for('emergency_request') }}" class="btn-outline-red">
+              <i class="bi bi-exclamation-triangle-fill"></i> Emergency Request
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column -->
+      <div class="col-lg-8">
+
+        <!-- Tabs -->
+        <div class="profile-tabs">
+          <a href="#edit-profile" class="profile-tab active" data-tab="edit-profile">
+            <i class="bi bi-pencil-square"></i> Edit Profile
+          </a>
+          <a href="#my-requests" class="profile-tab" data-tab="my-requests">
+            <i class="bi bi-exclamation-triangle"></i> My Requests
+            {% if my_requests %}
+              <span style="background:var(--red-deep); color:#fff; font-size:0.65rem; font-weight:700; border-radius:50%; width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center;">
+                {{ my_requests|length }}
+              </span>
+            {% endif %}
+          </a>
+        </div>
+
+        <!-- Edit Profile Tab -->
+        <div id="tab-edit-profile" class="tab-content-panel">
+          <div class="profile-section-card">
+            <h5><i class="bi bi-person-fill"></i> Personal Information</h5>
+            <form method="POST" action="{{ url_for('user_profile') }}" class="profile-form">
+              <div class="row g-3">
+
+                <div class="col-md-6">
+                  <label class="form-label">Full Name</label>
+                  <input type="text" name="full_name" class="form-control"
+                    value="{{ user.full_name or '' }}" placeholder="Your full name">
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">Phone Number</label>
+                  <input type="tel" name="phone" class="form-control"
+                    value="{{ user.phone or '' }}" placeholder="10-digit mobile number">
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">Blood Group</label>
+                  <select name="blood_group" class="form-select">
+                    <option value="">Select Blood Group</option>
+                    {% for bg in blood_groups %}
+                    <option value="{{ bg }}" {{ 'selected' if user.blood_group == bg }}>
+                      {{ bg }}
+                    </option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">City</label>
+                  <input type="text" name="city" class="form-control"
+                    value="{{ user.city or '' }}" placeholder="Your city">
+                </div>
+
+                <div class="col-12">
+                  <button type="submit" class="btn-save-profile">
+                    <i class="bi bi-check-circle-fill"></i> Save Changes
+                  </button>
+                </div>
+
+              </div>
+            </form>
+          </div>
+
+          <!-- Account Info -->
+          <div class="profile-section-card">
+            <h5><i class="bi bi-shield-check"></i> Account Information</h5>
+            <div class="info-row">
+              <span class="info-label">Username</span>
+              <span class="info-value">@{{ user.username }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Email</span>
+              <span class="info-value">{{ user.email }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Account Type</span>
+              <span class="info-value">
+                <span style="background:var(--red-light); color:var(--red-deep); font-size:0.78rem; font-weight:700; border-radius:var(--radius-pill); padding:0.15rem 0.6rem;">
+                  {{ user.role | title }}
+                </span>
+              </span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Member Since</span>
+              <span class="info-value">{{ user.created_at[:10] if user.created_at else 'N/A' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Status</span>
+              <span class="info-value">
+                {% if user.is_blocked %}
+                  <span style="color:var(--red-deep); font-weight:600;">🚫 Blocked</span>
+                {% else %}
+                  <span style="color:#1A7A4A; font-weight:600;">✅ Active</span>
+                {% endif %}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- My Requests Tab -->
+        <div id="tab-my-requests" class="tab-content-panel" style="display:none;">
+          <div class="profile-section-card">
+            <h5><i class="bi bi-exclamation-triangle-fill"></i> My Emergency Requests</h5>
+
+            {% if my_requests %}
+            <div style="overflow-x:auto;">
+              <table class="req-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Patient</th>
+                    <th>Blood Group</th>
+                    <th>Hospital</th>
+                    <th>District</th>
+                    <th>Units</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for req in my_requests %}
+                  <tr>
+                    <td style="color:var(--gray-500); font-size:0.8rem;">#{{ req.id }}</td>
+                    <td style="font-weight:600;">{{ req.patient_name }}</td>
+                    <td>
+                      <span style="background:var(--red-deep); color:#fff; font-weight:700; font-size:0.75rem; border-radius:var(--radius-pill); padding:0.15rem 0.55rem;">
+                        {{ req.blood_group }}
+                      </span>
+                    </td>
+                    <td>{{ req.hospital }}</td>
+                    <td>{{ req.district }}</td>
+                    <td>{{ req.units_needed }}</td>
+                    <td>
+                      <span class="req-badge {{ req.status }}">{{ req.status }}</span>
+                    </td>
+                    <td style="font-size:0.78rem; color:var(--gray-500);">
+                      {{ req.created_at[:10] if req.created_at else 'N/A' }}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            {% else %}
+            <div class="no-data">
+              <i class="bi bi-exclamation-triangle"></i>
+              <p>No emergency requests submitted yet.</p>
+              <a href="{{ url_for('emergency_request') }}" class="btn-outline-red mt-3">
+                <i class="bi bi-plus-circle"></i> Submit Request
+              </a>
+            </div>
+            {% endif %}
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Tab switching
+  document.querySelectorAll('.profile-tab').forEach(tab => {
+    tab.addEventListener('click', function(e) {
+      e.preventDefault();
+      const tabId = this.dataset.tab;
+
+      // Update tab buttons
+      document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+
+      // Show/hide panels
+      document.querySelectorAll('.tab-content-panel').forEach(panel => {
+        panel.style.display = 'none';
+      });
+      document.getElementById('tab-' + tabId).style.display = 'block';
+    });
+  });
+</script>
+{% endblock %}

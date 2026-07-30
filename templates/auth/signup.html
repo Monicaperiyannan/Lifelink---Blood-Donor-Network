@@ -1,0 +1,455 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up — LifeLink{% endblock %}
+
+{% block extra_css %}
+<style>
+  .auth-page {
+    min-height: calc(100vh - 200px);
+    background: var(--off-white);
+    display: flex;
+    align-items: center;
+    padding: 3rem 0;
+  }
+
+  .auth-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+    overflow: hidden;
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    min-height: 580px;
+  }
+
+  /* Left panel */
+  .auth-left {
+    background: linear-gradient(160deg, #C0152A 0%, #E63946 100%);
+    color: #fff;
+    padding: 3rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .auth-left::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 220px; height: 220px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 50%;
+  }
+
+  .auth-left::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: -40px;
+    width: 160px; height: 160px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+  }
+
+  .auth-left .logo-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .auth-left .logo-icon {
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+  }
+
+  .auth-left .logo-name {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .auth-left h2 {
+    font-family: var(--font-display);
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .auth-left p {
+    font-size: 0.92rem;
+    color: rgba(255,255,255,0.82);
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+  }
+
+  .steps-list {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .steps-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    font-size: 0.88rem;
+    color: rgba(255,255,255,0.85);
+  }
+
+  .steps-list .step-num {
+    width: 24px; height: 24px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* Right panel */
+  .auth-right {
+    flex: 1.2;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow-y: auto;
+  }
+
+  .auth-right h3 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 0.3rem;
+  }
+
+  .auth-right .auth-sub {
+    font-size: 0.88rem;
+    color: var(--gray-500);
+    margin-bottom: 1.5rem;
+  }
+
+  .auth-form-group {
+    margin-bottom: 1rem;
+  }
+
+  .auth-form-group label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 0.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .auth-form-group label .required {
+    color: var(--red-deep);
+    margin-left: 2px;
+  }
+
+  .auth-input-wrap {
+    position: relative;
+  }
+
+  .auth-input-wrap i {
+    position: absolute;
+    left: 0.9rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-300);
+    font-size: 0.95rem;
+  }
+
+  .auth-input {
+    width: 100%;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    padding: 0.65rem 0.9rem 0.65rem 2.5rem;
+    font-size: 0.9rem;
+    color: var(--gray-900);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-family: var(--font-body);
+  }
+
+  .auth-input:focus {
+    outline: none;
+    border-color: var(--red-deep);
+    box-shadow: 0 0 0 3px rgba(192,21,42,0.1);
+  }
+
+  .auth-input.is-invalid { border-color: var(--red-deep); }
+
+  .auth-error {
+    font-size: 0.78rem;
+    color: var(--red-deep);
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .form-hint {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    margin-top: 0.25rem;
+  }
+
+  .btn-auth {
+    background: var(--red-deep);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 0.8rem;
+    font-weight: 700;
+    font-size: 0.95rem;
+    width: 100%;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    font-family: var(--font-body);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .btn-auth:hover {
+    background: var(--red-mid);
+    transform: translateY(-1px);
+  }
+
+  .auth-switch {
+    text-align: center;
+    font-size: 0.88rem;
+    color: var(--gray-500);
+    margin-top: 1.25rem;
+  }
+
+  .auth-switch a {
+    color: var(--red-deep);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .auth-switch a:hover { text-decoration: underline; }
+
+  .auth-alert {
+    border-radius: var(--radius-sm);
+    padding: 0.7rem 1rem;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: none;
+    border-left: 3px solid;
+  }
+
+  .auth-alert.danger  { background:#FEF2F2; color:#991B1B; border-color:#C0152A; }
+  .auth-alert.success { background:#ECFDF5; color:#065F46; border-color:#1A7A4A; }
+
+  @media (max-width: 767.98px) {
+    .auth-card { flex-direction: column; }
+    .auth-left { padding: 2rem 1.5rem; }
+    .auth-right { padding: 1.75rem 1.5rem; }
+    .steps-list { display: none; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="container">
+    <div class="auth-card">
+
+      <!-- Left Panel -->
+      <div class="auth-left">
+        <div class="logo-wrap">
+          <div class="logo-icon"><i class="bi bi-heart-pulse-fill"></i></div>
+          <span class="logo-name">LifeLink</span>
+        </div>
+        <h2>Join the<br>Donor Network</h2>
+        <p>Create your free account and become part of India's largest blood donor community.</p>
+        <ul class="steps-list">
+          <li>
+            <div class="step-num">1</div>
+            <div>Create your account with basic details</div>
+          </li>
+          <li>
+            <div class="step-num">2</div>
+            <div>Complete your donor profile</div>
+          </li>
+          <li>
+            <div class="step-num">3</div>
+            <div>Register as a blood donor</div>
+          </li>
+          <li>
+            <div class="step-num">4</div>
+            <div>Start saving lives today!</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Right Panel -->
+      <div class="auth-right">
+        <h3>Create Account</h3>
+        <p class="auth-sub">Join LifeLink — free, secure, and life-saving</p>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="auth-alert {{ category }}">
+                <i class="bi bi-{{ 'check-circle-fill' if category == 'success' else 'exclamation-triangle-fill' }}"></i>
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('user_signup') }}" novalidate>
+
+          <!-- Full Name -->
+          <div class="auth-form-group">
+            <label>Full Name <span class="required">*</span></label>
+            <div class="auth-input-wrap">
+              <i class="bi bi-person-fill"></i>
+              <input
+                type="text"
+                name="full_name"
+                class="auth-input {{ 'is-invalid' if errors.full_name }}"
+                placeholder="e.g. Karthik Raja"
+                value="{{ form_data.full_name or '' }}"
+                autofocus
+              >
+            </div>
+            {% if errors.full_name %}
+              <div class="auth-error"><i class="bi bi-exclamation-circle"></i>{{ errors.full_name }}</div>
+            {% endif %}
+          </div>
+
+          <div class="row g-2">
+            <!-- Username -->
+            <div class="col-md-6">
+              <div class="auth-form-group">
+                <label>Username <span class="required">*</span></label>
+                <div class="auth-input-wrap">
+                  <i class="bi bi-at"></i>
+                  <input
+                    type="text"
+                    name="username"
+                    class="auth-input {{ 'is-invalid' if errors.username }}"
+                    placeholder="Choose a username"
+                    value="{{ form_data.username or '' }}"
+                  >
+                </div>
+                {% if errors.username %}
+                  <div class="auth-error"><i class="bi bi-exclamation-circle"></i>{{ errors.username }}</div>
+                {% else %}
+                  <div class="form-hint">Min. 3 characters</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="col-md-6">
+              <div class="auth-form-group">
+                <label>Email <span class="required">*</span></label>
+                <div class="auth-input-wrap">
+                  <i class="bi bi-envelope-fill"></i>
+                  <input
+                    type="email"
+                    name="email"
+                    class="auth-input {{ 'is-invalid' if errors.email }}"
+                    placeholder="you@example.com"
+                    value="{{ form_data.email or '' }}"
+                  >
+                </div>
+                {% if errors.email %}
+                  <div class="auth-error"><i class="bi bi-exclamation-circle"></i>{{ errors.email }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-2">
+            <!-- Password -->
+            <div class="col-md-6">
+              <div class="auth-form-group">
+                <label>Password <span class="required">*</span></label>
+                <div class="auth-input-wrap">
+                  <i class="bi bi-lock-fill"></i>
+                  <input
+                    type="password"
+                    name="password"
+                    class="auth-input {{ 'is-invalid' if errors.password }}"
+                    placeholder="Create a password"
+                  >
+                </div>
+                {% if errors.password %}
+                  <div class="auth-error"><i class="bi bi-exclamation-circle"></i>{{ errors.password }}</div>
+                {% else %}
+                  <div class="form-hint">Min. 6 characters</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="col-md-6">
+              <div class="auth-form-group">
+                <label>Confirm Password <span class="required">*</span></label>
+                <div class="auth-input-wrap">
+                  <i class="bi bi-lock-fill"></i>
+                  <input
+                    type="password"
+                    name="confirm_password"
+                    class="auth-input {{ 'is-invalid' if errors.confirm_password }}"
+                    placeholder="Re-enter password"
+                  >
+                </div>
+                {% if errors.confirm_password %}
+                  <div class="auth-error"><i class="bi bi-exclamation-circle"></i>{{ errors.confirm_password }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-auth">
+            <i class="bi bi-person-check-fill"></i>
+            Create My Account
+          </button>
+
+        </form>
+
+        <div class="auth-switch">
+          Already have an account?
+          <a href="{{ url_for('user_login') }}">Login here</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

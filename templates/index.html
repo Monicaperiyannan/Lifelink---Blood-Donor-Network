@@ -1,0 +1,799 @@
+{% extends "base.html" %}
+
+{% block title %}LifeLink — Donate Blood, Save Lives{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* About Section */
+  .about-section { background: var(--white); }
+
+  .about-img-wrap {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+  }
+
+  .about-stat-row {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .about-stat-row .mini-stat {
+    flex: 1;
+    text-align: center;
+    padding: 1rem;
+    background: var(--off-white);
+    border-radius: var(--radius-md);
+  }
+
+  .about-stat-row .mini-stat .num {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--red-deep);
+  }
+
+  .about-stat-row .mini-stat .lbl {
+    font-size: 0.78rem;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .about-checklist {
+    list-style: none;
+    padding: 0;
+    margin-top: 1.25rem;
+  }
+
+  .about-checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.92rem;
+    color: var(--gray-700);
+    margin-bottom: 0.7rem;
+  }
+
+  .about-checklist li i { color: #1A7A4A; font-size: 1.1rem; margin-top: 1px; }
+
+  /* Contact Section */
+  .contact-section { background: var(--off-white); }
+
+  .contact-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    padding: 2.5rem;
+    height: 100%;
+  }
+
+  .contact-info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .contact-info-item .icon-wrap {
+    width: 48px; height: 48px;
+    background: var(--red-light);
+    color: var(--red-deep);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  .contact-info-item h5 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.2rem;
+    color: var(--gray-900);
+  }
+
+  .contact-info-item p {
+    font-size: 0.88rem;
+    color: var(--gray-500);
+    margin: 0;
+  }
+
+  .contact-form .form-label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--gray-700);
+  }
+
+  .contact-form .form-control,
+  .contact-form textarea {
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--gray-300);
+    padding: 0.6rem 0.9rem;
+    font-size: 0.92rem;
+  }
+
+  .contact-form .form-control:focus,
+  .contact-form textarea:focus {
+    border-color: var(--red-deep);
+    box-shadow: 0 0 0 3px rgba(192,21,42,0.12);
+  }
+
+  .btn-contact-submit {
+    background: var(--red-deep);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 0.7rem 2.25rem;
+    font-weight: 700;
+    transition: background var(--transition), transform var(--transition);
+  }
+
+  .btn-contact-submit:hover {
+    background: var(--red-mid);
+    transform: translateY(-2px);
+    color: #fff;
+  }
+
+  /* Platform Modal */
+  .platform-feature-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .platform-feature-row i {
+    color: var(--red-deep);
+    font-size: 1.3rem;
+    margin-top: 2px;
+  }
+
+  .platform-feature-row h6 {
+    font-weight: 700;
+    margin-bottom: 0.15rem;
+    color: var(--gray-900);
+  }
+
+  .platform-feature-row p {
+    font-size: 0.85rem;
+    color: var(--gray-500);
+    margin: 0;
+  }
+
+  /* Announcement Banner */
+  .announcement-bar {
+    background: linear-gradient(90deg, var(--red-deep), var(--red-mid));
+    color: #fff;
+    padding: 0.6rem 0;
+    font-size: 0.82rem;
+    font-weight: 500;
+  }
+
+  .announcement-bar .ann-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ═══════════════════════════════════════════════════════
+     ANNOUNCEMENT BAR (if any)
+════════════════════════════════════════════════════════ -->
+{% if announcements %}
+<div class="announcement-bar">
+  <div class="container">
+    <div class="d-flex flex-wrap gap-3">
+      {% for ann in announcements %}
+      <div class="ann-item">
+        <i class="bi bi-megaphone-fill"></i>
+        <strong>{{ ann.title }}:</strong>
+        {{ ann.content[:80] }}{% if ann.content|length > 80 %}...{% endif %}
+      </div>
+      {% if not loop.last %}
+        <span style="opacity:0.4;">|</span>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ═══════════════════════════════════════════════════════
+     HERO SECTION
+════════════════════════════════════════════════════════ -->
+<section class="hero-section" id="home">
+  <div class="container position-relative" style="z-index:2;">
+    <div class="row align-items-center">
+
+      <!-- Left: Copy -->
+      <div class="col-lg-7 col-xl-6">
+
+        <div class="hero-eyebrow fade-up">
+          <i class="bi bi-heart-pulse-fill" style="color:#E63946;"></i>
+          India's Blood Donor Network
+        </div>
+
+        <h1 class="hero-title fade-up delay-1">
+          Donate Blood,<br>
+          <span class="accent">Save Lives.</span><br>
+          Connect Now.
+        </h1>
+
+        <p class="hero-subtitle fade-up delay-2">
+          LifeLink bridges verified blood donors with patients in need —
+          instantly, locally, and free of charge. One click can mean the
+          difference between life and loss.
+        </p>
+
+        <!-- CTA Buttons -->
+        <div class="d-flex flex-wrap gap-3 fade-up delay-3">
+          {% if session.user_id %}
+            <a href="{{ url_for('register') }}" class="btn-hero-primary">
+              <i class="bi bi-droplet-half"></i>
+              Register as Donor
+            </a>
+            <a href="{{ url_for('search_donor') }}" class="btn-hero-secondary">
+              <i class="bi bi-search-heart"></i>
+              Find Donor
+            </a>
+          {% else %}
+            <a href="{{ url_for('user_signup') }}" class="btn-hero-primary">
+              <i class="bi bi-droplet-half"></i>
+              Get Started Free
+            </a>
+            <a href="{{ url_for('user_login') }}" class="btn-hero-secondary">
+              <i class="bi bi-box-arrow-in-right"></i>
+              Login
+            </a>
+          {% endif %}
+        </div>
+
+        <!-- Trust signals -->
+        <div class="d-flex flex-wrap gap-3 mt-4 fade-up delay-4">
+          <div class="hero-stat-pill">
+            <span class="stat-num" data-count="{{ stats.total_donors }}" data-suffix="+">0+</span>
+            <span class="stat-lbl">Donors</span>
+          </div>
+          <div class="hero-stat-pill">
+            <span class="stat-num" data-count="{{ stats.lives_saved }}" data-suffix="+">0+</span>
+            <span class="stat-lbl">Lives Saved</span>
+          </div>
+          <div class="hero-stat-pill">
+            <span class="stat-num" data-count="{{ stats.cities_covered }}" data-suffix="+">0+</span>
+            <span class="stat-lbl">Cities</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right: Visual -->
+      <div class="col-lg-5 col-xl-6 hero-visual d-none d-lg-flex justify-content-center">
+        <div style="position:relative;">
+          <div class="blood-drop-large"></div>
+          <div class="position-absolute hero-stat-pill"
+               style="top:-30px; right:-60px; min-width:130px;">
+            <span style="font-size:1.5rem;">🩸</span>
+            <span class="stat-lbl mt-1">O− Universal Donor</span>
+          </div>
+          <div class="position-absolute hero-stat-pill"
+               style="bottom:10px; left:-70px; min-width:130px;">
+            <i class="bi bi-shield-check fs-4 text-success"></i>
+            <span class="stat-lbl mt-1">WHO Verified Process</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+<!-- /HERO -->
+
+
+<!-- ═══════════════════════════════════════════════════════
+     STATS BAR
+════════════════════════════════════════════════════════ -->
+<section class="stats-section py-4">
+  <div class="container">
+    <div class="row align-items-center text-center">
+
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-number">
+            <span data-count="{{ stats.total_donors }}">0</span>
+            <span class="stat-plus">+</span>
+          </div>
+          <div class="stat-label">Registered Donors</div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-number">
+            <span data-count="{{ stats.lives_saved }}">0</span>
+            <span class="stat-plus">+</span>
+          </div>
+          <div class="stat-label">Lives Saved</div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-number">
+            <span data-count="{{ stats.cities_covered }}">0</span>
+            <span class="stat-plus">+</span>
+          </div>
+          <div class="stat-label">Cities Covered</div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-number">
+            <span data-count="{{ stats.blood_groups }}">0</span>
+          </div>
+          <div class="stat-label">Blood Groups</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+<!-- /STATS BAR -->
+
+
+<!-- ═══════════════════════════════════════════════════════
+     FEATURES SECTION
+════════════════════════════════════════════════════════ -->
+<section class="features-section section-pad" id="features">
+  <div class="container">
+
+    <div class="text-center mb-5">
+      <span class="section-eyebrow fade-up">Why LifeLink?</span>
+      <h2 class="section-title fade-up delay-1">
+        Everything You Need to<br>Save a Life Today
+      </h2>
+      <p class="section-subtitle mt-3 fade-up delay-2">
+        A purpose-built platform for donors, recipients, and healthcare
+        professionals — secure, fast, and completely free.
+      </p>
+    </div>
+
+    <div class="row g-4">
+
+      <!-- 1. Donor Search -->
+      <div class="col-md-6 col-lg-4 fade-up delay-1">
+        <a href="{{ url_for('search_donor') }}" class="feature-card-link">
+          <div class="feature-card">
+            <div class="feature-icon-wrap">🔍</div>
+            <h3 class="feature-title">Donor Search</h3>
+            <p class="feature-desc">
+              Search by blood group instantly. Find a compatible donor
+              in seconds from our live registry.
+            </p>
+            <span class="feature-link-arrow">
+              Find a Donor <i class="bi bi-arrow-right"></i>
+            </span>
+          </div>
+        </a>
+      </div>
+
+      <!-- 2. Register as Donor -->
+      <div class="col-md-6 col-lg-4 fade-up delay-2">
+        <a href="{{ url_for('register') }}" class="feature-card-link">
+          <div class="feature-card">
+            <div class="feature-icon-wrap">📋</div>
+            <h3 class="feature-title">Easy Donor Registration</h3>
+            <p class="feature-desc">
+              Register as a donor in under two minutes. Help patients
+              find you quickly in emergencies.
+            </p>
+            <span class="feature-link-arrow">
+              Register Now <i class="bi bi-arrow-right"></i>
+            </span>
+          </div>
+        </a>
+      </div>
+
+      <!-- 3. Emergency Request -->
+      <div class="col-md-6 col-lg-4 fade-up delay-3">
+        <a href="{{ url_for('emergency_request') }}" class="feature-card-link">
+          <div class="feature-card">
+            <div class="feature-icon-wrap">🚨</div>
+            <h3 class="feature-title">Emergency Blood Request</h3>
+            <p class="feature-desc">
+              Submit an emergency blood request. Our admin team reviews
+              and connects you with donors immediately.
+            </p>
+            <span class="feature-link-arrow">
+              Request Now <i class="bi bi-arrow-right"></i>
+            </span>
+          </div>
+        </a>
+      </div>
+
+      <!-- 4. Privacy -->
+      <div class="col-md-6 col-lg-4 fade-up delay-1">
+        <a href="{{ url_for('privacy') }}" class="feature-card-link">
+          <div class="feature-card">
+            <div class="feature-icon-wrap">🔒</div>
+            <h3 class="feature-title">Privacy-First Design</h3>
+            <p class="feature-desc">
+              Donor contact details are never exposed publicly.
+              All data is secured with session-based authentication.
+            </p>
+            <span class="feature-link-arrow">
+              Learn More <i class="bi bi-arrow-right"></i>
+            </span>
+          </div>
+        </a>
+      </div>
+
+      <!-- 5. Location Search -->
+      <div class="col-md-6 col-lg-4 fade-up delay-2">
+        <a href="{{ url_for('location_search') }}" class="feature-card-link">
+          <div class="feature-card">
+            <div class="feature-icon-wrap">📍</div>
+            <h3 class="feature-title">Location-Based Matching</h3>
+            <p class="feature-desc">
+              Find donors in your Tamil Nadu district. All 38 districts
+              covered — even with no registered donors yet.
+            </p>
+            <span class="feature-link-arrow">
+              Search by District <i class="bi bi-arrow-right"></i>
+            </span>
+          </div>
+        </a>
+      </div>
+
+      <!-- 6. Eligibility Check -->
+      <div class="col-md-6 col-lg-4 fade-up delay-3">
+        <a href="{{ url_for('eligibility') }}" class="feature-card-link">
+          <div class="feature-card">
+            <div class="feature-icon-wrap">✅</div>
+            <h3 class="feature-title">Eligibility Check</h3>
+            <p class="feature-desc">
+              Check if you're eligible to donate based on age, weight,
+              and last donation date — instantly.
+            </p>
+            <span class="feature-link-arrow">
+              Check Now <i class="bi bi-arrow-right"></i>
+            </span>
+          </div>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+<!-- /FEATURES -->
+
+
+<!-- ═══════════════════════════════════════════════════════
+     ABOUT SECTION
+════════════════════════════════════════════════════════ -->
+<section class="about-section section-pad" id="about">
+  <div class="container">
+    <div class="row align-items-center g-5">
+
+      <div class="col-lg-6 fade-up">
+        <div class="about-img-wrap">
+          <img
+            src="https://images.unsplash.com/photo-1615461066841-6116e61058f4?w=900&q=80"
+            alt="Blood donation"
+            class="w-100"
+            style="height:420px; object-fit:cover;"
+          >
+        </div>
+      </div>
+
+      <div class="col-lg-6 fade-up delay-1">
+        <span class="section-eyebrow">About LifeLink</span>
+        <h2 class="section-title">Bridging Donors and<br>Patients, Faster</h2>
+        <p class="section-subtitle mt-3" style="margin:0; max-width:100%;">
+          LifeLink is a final-year project built to solve a real problem —
+          finding a compatible, willing blood donor quickly during emergencies.
+          We connect verified donors with hospitals, blood banks, and individuals
+          using smart search, eligibility checks, and district-based matching.
+        </p>
+
+        <ul class="about-checklist">
+          <li>
+            <i class="bi bi-check-circle-fill"></i>
+            Free to use for donors and recipients
+          </li>
+          <li>
+            <i class="bi bi-check-circle-fill"></i>
+            Verified donor profiles with privacy protection
+          </li>
+          <li>
+            <i class="bi bi-check-circle-fill"></i>
+            Built-in eligibility checker before donating
+          </li>
+          <li>
+            <i class="bi bi-check-circle-fill"></i>
+            Emergency request system with admin review
+          </li>
+          <li>
+            <i class="bi bi-check-circle-fill"></i>
+            Real-time analytics for blood banks and admins
+          </li>
+        </ul>
+
+        <div class="about-stat-row">
+          <div class="mini-stat">
+            <div class="num">{{ stats.total_donors }}+</div>
+            <div class="lbl">Donors</div>
+          </div>
+          <div class="mini-stat">
+            <div class="num">{{ stats.cities_covered }}+</div>
+            <div class="lbl">Cities</div>
+          </div>
+          <div class="mini-stat">
+            <div class="num">8</div>
+            <div class="lbl">Blood Types</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+<!-- /ABOUT -->
+
+
+<!-- ═══════════════════════════════════════════════════════
+     BLOOD GROUPS
+════════════════════════════════════════════════════════ -->
+<section class="blood-group-section section-pad" id="blood-groups"
+         style="background:var(--off-white);">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="section-eyebrow fade-up">Compatibility Guide</span>
+      <h2 class="section-title fade-up delay-1">
+        All 8 Blood Groups,<br>One Platform
+      </h2>
+      <p class="section-subtitle mt-3 fade-up delay-2">
+        LifeLink tracks donors across every ABO + Rh blood type.
+      </p>
+    </div>
+
+    <div class="row g-4 justify-content-center text-center fade-up delay-2">
+      {% set groups = ['A+','A−','B+','B−','AB+','AB−','O+','O−'] %}
+      {% for g in groups %}
+      <div class="col-6 col-sm-4 col-md-3 col-lg-auto">
+        <div class="blood-badge mx-auto">{{ g }}</div>
+        <p class="mt-2 mb-0" style="font-size:0.8rem; color:var(--gray-500);">
+          {% if g == 'O−' %}Universal Donor
+          {% elif g == 'AB+' %}Universal Recipient
+          {% else %}{{ g }} Compatible{% endif %}
+        </p>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="row justify-content-center mt-5 fade-up delay-3">
+      <div class="col-lg-8">
+        <div class="p-4 rounded-3 text-center"
+             style="background:var(--red-light); border:1.5px dashed var(--red-deep);">
+          <i class="bi bi-info-circle-fill me-2" style="color:var(--red-deep);"></i>
+          <strong style="color:var(--red-deep);">Did you know?</strong>
+          <span style="color:var(--gray-700);">
+            O− is the universal donor. AB+ is the universal recipient.
+            Always confirm compatibility with a medical professional.
+          </span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+<!-- /BLOOD GROUPS -->
+
+
+<!-- ═══════════════════════════════════════════════════════
+     CONTACT SECTION
+════════════════════════════════════════════════════════ -->
+<section class="contact-section section-pad" id="contact">
+  <div class="container">
+
+    <div class="text-center mb-5">
+      <span class="section-eyebrow fade-up">Get in Touch</span>
+      <h2 class="section-title fade-up delay-1">We're Here to Help</h2>
+      <p class="section-subtitle mt-3 fade-up delay-2">
+        Questions about donating, eligibility, or partnerships?
+        Reach out — we respond within 24 hours.
+      </p>
+    </div>
+
+    <div class="row g-4">
+
+      <!-- Contact Info -->
+      <div class="col-lg-5 fade-up delay-1">
+        <div class="contact-card">
+
+          <div class="contact-info-item">
+            <div class="icon-wrap"><i class="bi bi-telephone-fill"></i></div>
+            <div>
+              <h5>24/7 Helpline</h5>
+              <p>1800-BLOOD (1800-256-663)</p>
+            </div>
+          </div>
+
+          <div class="contact-info-item">
+            <div class="icon-wrap"><i class="bi bi-envelope-fill"></i></div>
+            <div>
+              <h5>Email Us</h5>
+              <p>support@lifelink.health</p>
+            </div>
+          </div>
+
+          <div class="contact-info-item">
+            <div class="icon-wrap"><i class="bi bi-geo-alt-fill"></i></div>
+            <div>
+              <h5>Coverage Area</h5>
+              <p>Serving {{ stats.cities_covered }}+ cities across India</p>
+            </div>
+          </div>
+
+          <div class="contact-info-item mb-0">
+            <div class="icon-wrap"><i class="bi bi-clock-fill"></i></div>
+            <div>
+              <h5>Response Time</h5>
+              <p>Within 24 hours, every day</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Contact Form -->
+      <div class="col-lg-7 fade-up delay-2">
+        <div class="contact-card contact-form">
+          <form onsubmit="
+            event.preventDefault();
+            showToast('Message sent! We will get back to you soon.', 'success');
+            this.reset();">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Your Name</label>
+                <input type="text" class="form-control"
+                  placeholder="e.g. Priya Sharma" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-control"
+                  placeholder="you@example.com" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Subject</label>
+                <input type="text" class="form-control"
+                  placeholder="How can we help?" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Message</label>
+                <textarea class="form-control" rows="4"
+                  placeholder="Write your message here..." required></textarea>
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn-contact-submit">
+                  <i class="bi bi-send-fill me-2"></i>Send Message
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+<!-- /CONTACT -->
+
+
+<!-- ═══════════════════════════════════════════════════════
+     CTA BANNER
+════════════════════════════════════════════════════════ -->
+<section class="section-pad"
+         style="background:linear-gradient(135deg, #C0152A 0%, #E63946 100%);">
+  <div class="container text-center">
+    <h2 class="fade-up"
+        style="font-family:var(--font-display); color:#fff;
+               font-size:clamp(1.8rem,4vw,2.8rem); letter-spacing:-0.02em;">
+      Ready to Make a Difference?
+    </h2>
+    <p class="fade-up delay-1 mt-3 mb-4"
+       style="color:rgba(255,255,255,0.82); font-size:1.05rem;
+              max-width:500px; margin-inline:auto;">
+      Join {{ stats.total_donors }}+ donors already on LifeLink.
+      Registration takes less than two minutes.
+    </p>
+    <div class="d-flex flex-wrap gap-3 justify-content-center fade-up delay-2">
+      {% if session.user_id %}
+        <a href="{{ url_for('register') }}"
+           class="btn-hero-primary"
+           style="background:#fff; color:var(--red-deep);">
+          <i class="bi bi-person-plus-fill"></i> Register as Donor
+        </a>
+        <a href="{{ url_for('search_donor') }}" class="btn-hero-secondary">
+          <i class="bi bi-search-heart"></i> Find Donor
+        </a>
+      {% else %}
+        <a href="{{ url_for('user_signup') }}"
+           class="btn-hero-primary"
+           style="background:#fff; color:var(--red-deep);">
+          <i class="bi bi-person-plus-fill"></i> Join LifeLink Free
+        </a>
+        <a href="{{ url_for('user_login') }}" class="btn-hero-secondary">
+          <i class="bi bi-box-arrow-in-right"></i> Login
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+<!-- /CTA BANNER -->
+
+
+<!-- Platform Modal -->
+<div class="modal fade" id="platformModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content" style="border-radius:var(--radius-lg); border:none;">
+      <div class="modal-header" style="border-bottom:1px solid var(--gray-100);">
+        <h5 class="modal-title"
+            style="font-family:var(--font-display); font-weight:700;">
+          <i class="bi bi-phone-fill me-2" style="color:var(--red-deep);"></i>
+          Platform Information
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="platform-feature-row">
+              <i class="bi bi-display"></i>
+              <div>
+                <h6>Responsive Layout</h6>
+                <p>Built with Bootstrap 5 — works on any screen size.</p>
+              </div>
+            </div>
+            <div class="platform-feature-row">
+              <i class="bi bi-lightning-charge-fill"></i>
+              <div>
+                <h6>Fast &amp; Lightweight</h6>
+                <p>No heavy downloads. Works directly in your browser.</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="platform-feature-row">
+              <i class="bi bi-shield-lock-fill"></i>
+              <div>
+                <h6>Secure Sessions</h6>
+                <p>Role-based access keeps donor data protected.</p>
+              </div>
+            </div>
+            <div class="platform-feature-row">
+              <i class="bi bi-wifi"></i>
+              <div>
+                <h6>Low Bandwidth Friendly</h6>
+                <p>Optimised for hospitals and rural areas.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="border-top:1px solid var(--gray-100);">
+        <button type="button" class="btn btn-secondary btn-sm"
+                data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

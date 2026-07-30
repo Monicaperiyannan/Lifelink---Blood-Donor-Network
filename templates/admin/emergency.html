@@ -1,0 +1,291 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Emergency Requests — LifeLink Admin{% endblock %}
+{% block page_title %}Emergency Requests{% endblock %}
+{% block breadcrumb %}Emergency{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<div class="a-page-header">
+  <div>
+    <h2>Emergency Blood Requests</h2>
+    <p>Review, approve, reject and manage all emergency blood requests.</p>
+  </div>
+  <a href="{{ url_for('admin_export_emergency') }}" class="btn-admin-secondary">
+    <i class="bi bi-download"></i> Export CSV
+  </a>
+</div>
+
+<!-- Status Stats -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="a-stat-card">
+      <div class="a-stat-icon gold"><i class="bi bi-hourglass-split"></i></div>
+      <div>
+        <div class="a-stat-value">{{ pending }}</div>
+        <div class="a-stat-label">Pending</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="a-stat-card">
+      <div class="a-stat-icon green"><i class="bi bi-check-circle-fill"></i></div>
+      <div>
+        <div class="a-stat-value">{{ approved }}</div>
+        <div class="a-stat-label">Approved</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="a-stat-card">
+      <div class="a-stat-icon blue"><i class="bi bi-flag-fill"></i></div>
+      <div>
+        <div class="a-stat-value">{{ completed }}</div>
+        <div class="a-stat-label">Completed</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="a-stat-card">
+      <div class="a-stat-icon red"><i class="bi bi-x-circle-fill"></i></div>
+      <div>
+        <div class="a-stat-value">{{ rejected }}</div>
+        <div class="a-stat-label">Rejected</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Filter Tabs -->
+<div class="d-flex gap-2 mb-3 flex-wrap">
+  <a href="{{ url_for('admin_emergency') }}"
+     class="btn-a {{ 'btn-a-view' if not status_filter else 'btn-a-close' }}">
+    All ({{ pending + approved + completed + rejected }})
+  </a>
+  <a href="{{ url_for('admin_emergency') }}?status=pending"
+     class="btn-a {{ 'btn-a-block' if status_filter == 'pending' else 'btn-a-close' }}">
+    <i class="bi bi-hourglass-split"></i> Pending ({{ pending }})
+  </a>
+  <a href="{{ url_for('admin_emergency') }}?status=approved"
+     class="btn-a {{ 'btn-a-approve' if status_filter == 'approved' else 'btn-a-close' }}">
+    <i class="bi bi-check-circle"></i> Approved ({{ approved }})
+  </a>
+  <a href="{{ url_for('admin_emergency') }}?status=completed"
+     class="btn-a {{ 'btn-a-complete' if status_filter == 'completed' else 'btn-a-close' }}">
+    <i class="bi bi-flag-fill"></i> Completed ({{ completed }})
+  </a>
+  <a href="{{ url_for('admin_emergency') }}?status=rejected"
+     class="btn-a {{ 'btn-a-del' if status_filter == 'rejected' else 'btn-a-close' }}">
+    <i class="bi bi-x-circle"></i> Rejected ({{ rejected }})
+  </a>
+</div>
+
+<!-- Requests Table -->
+<div class="a-card">
+  <div class="a-card-header">
+    <h5>
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      {% if status_filter %}
+        {{ status_filter|title }} Requests
+      {% else %}
+        All Emergency Requests
+      {% endif %}
+    </h5>
+    <span style="font-size:0.8rem; color:var(--gray-500);">
+      {{ requests|length }} request{{ 's' if requests|length != 1 else '' }}
+    </span>
+  </div>
+
+  {% if requests %}
+  <div style="overflow-x:auto;">
+    <table class="a-table">
+      <thead>
+        <tr>
+          <th>#ID</th>
+          <th>Patient</th>
+          <th>Blood Group</th>
+          <th>Hospital</th>
+          <th>District</th>
+          <th>Units</th>
+          <th>Contact</th>
+          <th>Requested By</th>
+          <th>Notes</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in requests %}
+        <tr>
+          <td><span class="b-id">#{{ r.id }}</span></td>
+
+          <td style="font-weight:600; color:var(--gray-900);">
+            {{ r.patient_name }}
+          </td>
+
+          <td><span class="b-blood">{{ r.blood_group }}</span></td>
+
+          <td style="font-size:0.82rem;">
+            <i class="bi bi-hospital-fill me-1" style="color:var(--red); font-size:0.72rem;"></i>
+            {{ r.hospital }}
+          </td>
+
+          <td style="font-size:0.82rem;">
+            <i class="bi bi-geo-alt-fill me-1" style="color:var(--red); font-size:0.72rem;"></i>
+            {{ r.district }}
+          </td>
+
+          <td style="text-align:center; font-weight:700;">
+            {{ r.units_needed }}
+          </td>
+
+          <td style="font-size:0.82rem;">
+            <i class="bi bi-telephone-fill me-1" style="color:var(--red); font-size:0.72rem;"></i>
+            {{ r.contact_phone }}
+          </td>
+
+          <td style="font-size:0.78rem; color:var(--gray-500);">
+            {% if r.username %}
+              <i class="bi bi-person-fill me-1"></i>{{ r.username }}
+            {% else %}
+              <span style="color:var(--gray-300);">—</span>
+            {% endif %}
+          </td>
+
+          <td style="font-size:0.78rem; color:var(--gray-500); max-width:120px;">
+            {% if r.notes %}
+              <span title="{{ r.notes }}">
+                {{ r.notes[:40] }}{% if r.notes|length > 40 %}...{% endif %}
+              </span>
+            {% else %}
+              <span style="color:var(--gray-300);">—</span>
+            {% endif %}
+          </td>
+
+          <td>
+            <span class="b-status-{{ r.status }}">{{ r.status|title }}</span>
+          </td>
+
+          <td style="font-size:0.75rem; color:var(--gray-500); white-space:nowrap;">
+            {{ r.created_at[:10] if r.created_at else 'N/A' }}
+          </td>
+
+          <td>
+            <div class="d-flex gap-1 flex-wrap">
+
+              {% if r.status == 'pending' %}
+              <a href="{{ url_for('admin_update_emergency', req_id=r.id, status='approved') }}"
+                 class="btn-a btn-a-approve" title="Approve">
+                <i class="bi bi-check-lg"></i> Approve
+              </a>
+              <a href="{{ url_for('admin_update_emergency', req_id=r.id, status='rejected') }}"
+                 class="btn-a btn-a-reject" title="Reject">
+                <i class="bi bi-x-lg"></i> Reject
+              </a>
+
+              {% elif r.status == 'approved' %}
+              <a href="{{ url_for('admin_update_emergency', req_id=r.id, status='completed') }}"
+                 class="btn-a btn-a-complete" title="Mark Completed">
+                <i class="bi bi-flag-fill"></i> Complete
+              </a>
+              <a href="{{ url_for('admin_update_emergency', req_id=r.id, status='rejected') }}"
+                 class="btn-a btn-a-reject" title="Reject">
+                <i class="bi bi-x-lg"></i> Reject
+              </a>
+
+              {% elif r.status == 'completed' or r.status == 'rejected' %}
+              <a href="{{ url_for('admin_update_emergency', req_id=r.id, status='pending') }}"
+                 class="btn-a btn-a-toggle" title="Reopen">
+                <i class="bi bi-arrow-counterclockwise"></i> Reopen
+              </a>
+              {% endif %}
+
+              <!-- Delete -->
+              <button type="button"
+                class="btn-a btn-a-del"
+                title="Delete"
+                data-bs-toggle="modal"
+                data-bs-target="#delReqModal{{ r.id }}">
+                <i class="bi bi-trash3-fill"></i>
+              </button>
+
+            </div>
+
+            <!-- Delete Modal -->
+            <div class="modal fade" id="delReqModal{{ r.id }}"
+                 tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered modal-sm">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" style="font-size:0.95rem;">
+                      <i class="bi bi-trash3-fill me-2" style="color:var(--red);"></i>
+                      Delete Request?
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                  </div>
+                  <div class="modal-body" style="font-size:0.88rem;">
+                    Delete emergency request for
+                    <strong>{{ r.patient_name }}</strong>?
+                    This cannot be undone.
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn-admin-secondary"
+                            data-bs-dismiss="modal">Cancel</button>
+                    <form method="POST"
+                          action="{{ url_for('admin_delete_emergency', req_id=r.id) }}"
+                          style="display:inline;">
+                      <button type="submit" class="btn-admin-primary"
+                              style="background:var(--red);">
+                        <i class="bi bi-trash3-fill"></i> Delete
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% else %}
+  <div class="a-no-data">
+    <i class="bi bi-inbox"></i>
+    <h5>No Requests Found</h5>
+    <p>
+      {% if status_filter %}
+        No {{ status_filter }} emergency requests.
+      {% else %}
+        No emergency requests submitted yet.
+      {% endif %}
+    </p>
+    {% if status_filter %}
+    <a href="{{ url_for('admin_emergency') }}" class="btn-admin-secondary mt-3">
+      <i class="bi bi-arrow-left"></i> View All Requests
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- Info Note -->
+<div class="mt-3 p-3 rounded"
+  style="background:rgba(245,166,35,0.08); border:1px solid rgba(245,166,35,0.2);">
+  <small class="d-flex align-items-start gap-2" style="color:var(--gray-500); font-size:0.78rem;">
+    <i class="bi bi-info-circle-fill" style="color:var(--gold); flex-shrink:0; margin-top:1px;"></i>
+    <span>
+      <strong>Workflow:</strong>
+      Pending → Approve or Reject →
+      Approved → Mark as Completed when fulfilled.
+      Rejected/Completed requests can be reopened if needed.
+    </span>
+  </small>
+</div>
+
+{% endblock %}

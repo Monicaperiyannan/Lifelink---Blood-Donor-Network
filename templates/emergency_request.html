@@ -1,0 +1,573 @@
+{% extends "base.html" %}
+
+{% block title %}Emergency Blood Request — LifeLink{% endblock %}
+
+{% block extra_css %}
+<style>
+  .emergency-page {
+    background: var(--off-white);
+    min-height: 80vh;
+    padding: 0 0 3rem;
+  }
+
+  /* Hero Banner */
+  .emergency-hero {
+    background: linear-gradient(135deg, #111827 0%, #1A0305 60%, #C0152A 100%);
+    padding: 2.5rem 0;
+    margin-bottom: 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .emergency-hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 250px; height: 250px;
+    background: rgba(192,21,42,0.12);
+    border-radius: 50%;
+  }
+
+  .emergency-hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.4rem;
+  }
+
+  .emergency-hero p {
+    color: rgba(255,255,255,0.72);
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  .emergency-hero .pulse-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(192,21,42,0.2);
+    border: 1px solid rgba(192,21,42,0.4);
+    border-radius: var(--radius-pill);
+    padding: 0.3rem 0.9rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #FF8A8A;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 0.9rem;
+    animation: pulse-border 2s infinite;
+  }
+
+  .pulse-dot {
+    width: 8px; height: 8px;
+    background: #FF8A8A;
+    border-radius: 50%;
+    animation: blink 1.2s infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.2; }
+  }
+
+  /* Form Card */
+  .emergency-form-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+
+  .emergency-form-header {
+    background: var(--red-deep);
+    padding: 1.25rem 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .emergency-form-header i {
+    font-size: 1.3rem;
+    color: #fff;
+  }
+
+  .emergency-form-header h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    font-size: 1.1rem;
+  }
+
+  .emergency-form-body { padding: 1.75rem; }
+
+  .form-label {
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: var(--gray-700);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.4rem;
+  }
+
+  .required-star { color: var(--red-deep); }
+
+  .form-control, .form-select, textarea.form-control {
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    padding: 0.65rem 0.9rem;
+    font-size: 0.9rem;
+    color: var(--gray-900);
+    transition: border-color var(--transition), box-shadow var(--transition);
+    font-family: var(--font-body);
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: var(--red-deep);
+    box-shadow: 0 0 0 3px rgba(192,21,42,0.1);
+    outline: none;
+  }
+
+  .btn-submit-emergency {
+    background: var(--red-deep);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 0.8rem 2.5rem;
+    font-weight: 700;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background var(--transition), transform var(--transition);
+    cursor: pointer;
+    font-family: var(--font-body);
+  }
+
+  .btn-submit-emergency:hover {
+    background: var(--red-mid);
+    transform: translateY(-2px);
+    color: #fff;
+  }
+
+  /* Info Sidebar */
+  .info-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .info-card h5 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--gray-900);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .info-card h5 i { color: var(--red-deep); }
+
+  .tip-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--gray-700);
+    margin-bottom: 0.7rem;
+    line-height: 1.5;
+  }
+
+  .tip-item i { color: var(--red-deep); margin-top: 2px; flex-shrink: 0; }
+
+  .emergency-hotline {
+    background: linear-gradient(135deg, var(--red-deep), var(--red-mid));
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    text-align: center;
+    color: #fff;
+  }
+
+  .emergency-hotline .hotline-num {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  .emergency-hotline p {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.75);
+    margin: 0.25rem 0 0;
+  }
+
+  /* Requests History */
+  .requests-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+    margin-top: 2rem;
+  }
+
+  .requests-card-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .requests-card-header h5 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--gray-900);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .requests-card-header h5 i { color: var(--red-deep); }
+
+  .req-table { width: 100%; border-collapse: collapse; }
+
+  .req-table th {
+    padding: 0.7rem 1rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+    background: var(--gray-900);
+    white-space: nowrap;
+  }
+
+  .req-table td {
+    padding: 0.85rem 1rem;
+    font-size: 0.85rem;
+    color: var(--gray-700);
+    border-bottom: 1px solid var(--gray-100);
+    vertical-align: middle;
+  }
+
+  .req-table tbody tr:last-child td { border-bottom: none; }
+  .req-table tbody tr:hover { background: var(--off-white); }
+
+  .req-status {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    border-radius: var(--radius-pill);
+    padding: 0.2rem 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .req-status.pending   { background:#FEF3C7; color:#92400E; }
+  .req-status.approved  { background:#ECFDF5; color:#1A7A4A; }
+  .req-status.completed { background:#EFF6FF; color:#1D4ED8; }
+  .req-status.rejected  { background:var(--red-light); color:var(--red-deep); }
+
+  .no-data {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--gray-500);
+  }
+
+  .no-data i {
+    font-size: 2.5rem;
+    color: var(--gray-300);
+    display: block;
+    margin-bottom: 0.75rem;
+  }
+
+  .no-data p { font-size: 0.88rem; margin: 0; }
+
+  .blood-badge {
+    display: inline-block;
+    background: var(--red-deep);
+    color: #fff;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.75rem;
+    border-radius: var(--radius-pill);
+    padding: 0.18rem 0.6rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Emergency Hero -->
+<div class="emergency-hero">
+  <div class="container" style="position:relative; z-index:1;">
+    <div class="pulse-badge">
+      <span class="pulse-dot"></span>
+      Emergency Blood Request System
+    </div>
+    <h1>
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      Emergency Blood Request
+    </h1>
+    <p>Submit an emergency blood request and our team will notify matching donors immediately.</p>
+  </div>
+</div>
+
+<div class="emergency-page">
+  <div class="container">
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show mb-3" role="alert">
+            <i class="bi bi-{{ 'check-circle-fill' if category == 'success' else 'exclamation-triangle-fill' }} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="row g-4">
+
+      <!-- Form -->
+      <div class="col-lg-8">
+        <div class="emergency-form-card">
+
+          <div class="emergency-form-header">
+            <i class="bi bi-heart-pulse-fill"></i>
+            <h4>Submit Emergency Blood Request</h4>
+          </div>
+
+          <div class="emergency-form-body">
+            <form method="POST" action="{{ url_for('emergency_request') }}" novalidate>
+              <div class="row g-3">
+
+                <!-- Patient Name -->
+                <div class="col-md-6">
+                  <label class="form-label">
+                    Patient Name <span class="required-star">*</span>
+                  </label>
+                  <input type="text" name="patient_name" class="form-control"
+                    placeholder="e.g. Priya Sharma" required>
+                </div>
+
+                <!-- Blood Group -->
+                <div class="col-md-3">
+                  <label class="form-label">
+                    Blood Group <span class="required-star">*</span>
+                  </label>
+                  <select name="blood_group" class="form-select" required>
+                    <option value="">Select</option>
+                    {% for bg in blood_groups %}
+                    <option value="{{ bg }}">{{ bg }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <!-- Units Needed -->
+                <div class="col-md-3">
+                  <label class="form-label">
+                    Units Needed <span class="required-star">*</span>
+                  </label>
+                  <input type="number" name="units_needed" class="form-control"
+                    min="1" max="10" value="1" required>
+                </div>
+
+                <!-- Hospital -->
+                <div class="col-md-6">
+                  <label class="form-label">
+                    Hospital Name <span class="required-star">*</span>
+                  </label>
+                  <input type="text" name="hospital" class="form-control"
+                    placeholder="e.g. Apollo Hospital" required>
+                </div>
+
+                <!-- District -->
+                <div class="col-md-6">
+                  <label class="form-label">
+                    District <span class="required-star">*</span>
+                  </label>
+                  <select name="district" class="form-select" required>
+                    <option value="">Select District</option>
+                    {% for d in districts %}
+                    <option value="{{ d }}">{{ d }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <!-- Contact Phone -->
+                <div class="col-md-6">
+                  <label class="form-label">
+                    Contact Phone <span class="required-star">*</span>
+                  </label>
+                  <input type="tel" name="contact_phone" class="form-control"
+                    placeholder="10-digit mobile number" required>
+                </div>
+
+                <!-- Additional Notes -->
+                <div class="col-12">
+                  <label class="form-label">Additional Notes</label>
+                  <textarea name="notes" class="form-control" rows="3"
+                    placeholder="Any additional information (e.g. patient condition, urgency level)..."></textarea>
+                </div>
+
+                <!-- Warning Banner -->
+                <div class="col-12">
+                  <div class="p-3 rounded" style="background:var(--red-light); border:1.5px dashed var(--red-deep);">
+                    <small class="d-flex align-items-start gap-2" style="color:var(--gray-700);">
+                      <i class="bi bi-info-circle-fill mt-1" style="color:var(--red-deep); flex-shrink:0;"></i>
+                      <span>
+                        In a life-threatening emergency, <strong>call 112 immediately</strong>.
+                        This platform connects you with donors but is not a substitute for emergency medical services.
+                      </span>
+                    </small>
+                  </div>
+                </div>
+
+                <!-- Submit -->
+                <div class="col-12">
+                  <button type="submit" class="btn-submit-emergency">
+                    <i class="bi bi-send-fill"></i>
+                    Submit Emergency Request
+                  </button>
+                </div>
+
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="col-lg-4">
+
+        <!-- Emergency Hotline -->
+        <div class="emergency-hotline mb-4">
+          <i class="bi bi-telephone-fill" style="font-size:1.5rem; margin-bottom:0.5rem; display:block;"></i>
+          <div class="hotline-num">1800-BLOOD</div>
+          <p>24/7 Emergency Helpline</p>
+        </div>
+
+        <!-- Tips -->
+        <div class="info-card">
+          <h5><i class="bi bi-lightbulb-fill"></i> How It Works</h5>
+          <div class="tip-item">
+            <i class="bi bi-1-circle-fill"></i>
+            Fill in the patient and hospital details accurately.
+          </div>
+          <div class="tip-item">
+            <i class="bi bi-2-circle-fill"></i>
+            Select the required blood group and district.
+          </div>
+          <div class="tip-item">
+            <i class="bi bi-3-circle-fill"></i>
+            Our admin team reviews and approves requests.
+          </div>
+          <div class="tip-item">
+            <i class="bi bi-4-circle-fill"></i>
+            Matching donors in your district are notified.
+          </div>
+          <div class="tip-item">
+            <i class="bi bi-5-circle-fill"></i>
+            Track your request status in My Profile.
+          </div>
+        </div>
+
+        <!-- Info -->
+        <div class="info-card">
+          <h5><i class="bi bi-shield-check"></i> Important Notes</h5>
+          <div class="tip-item">
+            <i class="bi bi-check-circle-fill" style="color:#1A7A4A;"></i>
+            Requests are reviewed within 30 minutes.
+          </div>
+          <div class="tip-item">
+            <i class="bi bi-check-circle-fill" style="color:#1A7A4A;"></i>
+            Provide accurate contact details for faster response.
+          </div>
+          <div class="tip-item">
+            <i class="bi bi-check-circle-fill" style="color:#1A7A4A;"></i>
+            You can track request status in your profile.
+          </div>
+          <div class="tip-item">
+            <i class="bi bi-exclamation-triangle-fill" style="color:var(--gold);"></i>
+            False requests may result in account suspension.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- My Requests History -->
+    {% if my_requests %}
+    <div class="requests-card">
+      <div class="requests-card-header">
+        <h5>
+          <i class="bi bi-clock-history"></i>
+          My Request History
+        </h5>
+        <span style="font-size:0.82rem; color:var(--gray-500);">
+          {{ my_requests|length }} request{{ 's' if my_requests|length != 1 else '' }}
+        </span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="req-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Patient</th>
+              <th>Blood Group</th>
+              <th>Hospital</th>
+              <th>District</th>
+              <th>Units</th>
+              <th>Status</th>
+              <th>Admin Notes</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for req in my_requests %}
+            <tr>
+              <td style="color:var(--gray-400); font-family:monospace; font-size:0.8rem;">#{{ req.id }}</td>
+              <td style="font-weight:600; color:var(--gray-900);">{{ req.patient_name }}</td>
+              <td><span class="blood-badge">{{ req.blood_group }}</span></td>
+              <td>{{ req.hospital }}</td>
+              <td>{{ req.district }}</td>
+              <td style="text-align:center; font-weight:700;">{{ req.units_needed }}</td>
+              <td><span class="req-status {{ req.status }}">{{ req.status }}</span></td>
+              <td style="font-size:0.8rem; color:var(--gray-500);">
+                {{ req.admin_notes or '—' }}
+              </td>
+              <td style="font-size:0.78rem; color:var(--gray-500); white-space:nowrap;">
+                {{ req.created_at[:10] if req.created_at else 'N/A' }}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {% else %}
+    <div class="requests-card">
+      <div class="requests-card-header">
+        <h5><i class="bi bi-clock-history"></i> My Request History</h5>
+      </div>
+      <div class="no-data">
+        <i class="bi bi-inbox"></i>
+        <p>No emergency requests submitted yet.</p>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,797 @@
+{% extends "base.html" %}
+
+{% block title %}Eligibility Check — LifeLink{% endblock %}
+
+{% block extra_css %}
+<style>
+  .eligibility-page {
+    background: var(--off-white);
+    min-height: 80vh;
+    padding: 0 0 3rem;
+  }
+
+  .eligibility-hero {
+    background: linear-gradient(135deg, #111827 0%, #1A0305 60%, #C0152A 100%);
+    padding: 2.5rem 0;
+    margin-bottom: 2.5rem;
+  }
+
+  .eligibility-hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.4rem;
+  }
+
+  .eligibility-hero p {
+    color: rgba(255,255,255,0.72);
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  .eligibility-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+
+  .eligibility-card-header {
+    background: var(--red-deep);
+    padding: 1.25rem 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .eligibility-card-header i { font-size: 1.3rem; color: #fff; }
+
+  .eligibility-card-header h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    font-size: 1.1rem;
+  }
+
+  .eligibility-form-body { padding: 2rem; }
+
+  .form-label {
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: var(--gray-700);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .form-control {
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    padding: 0.7rem 0.9rem;
+    font-size: 0.92rem;
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+
+  .form-control:focus {
+    border-color: var(--red-deep);
+    box-shadow: 0 0 0 3px rgba(192,21,42,0.1);
+    outline: none;
+  }
+
+  .field-hint {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    margin-top: 0.3rem;
+  }
+
+  .btn-check-eligibility {
+    background: var(--red-deep);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 0.8rem 2.5rem;
+    font-weight: 700;
+    font-size: 1rem;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: background var(--transition), transform var(--transition);
+    cursor: pointer;
+    font-family: var(--font-body);
+  }
+
+  .btn-check-eligibility:hover {
+    background: var(--red-mid);
+    transform: translateY(-2px);
+  }
+
+  /* Result Box */
+  .result-box {
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin-top: 1.5rem;
+    text-align: center;
+  }
+
+  .result-box.eligible {
+    background: #ECFDF5;
+    border: 2px solid #1A7A4A;
+  }
+
+  .result-box.not-eligible {
+    background: var(--red-light);
+    border: 2px solid var(--red-deep);
+  }
+
+  .result-icon-wrap {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2rem;
+    margin: 0 auto 1.25rem;
+  }
+
+  .result-box.eligible .result-icon-wrap {
+    background: #1A7A4A;
+    color: #fff;
+  }
+
+  .result-box.not-eligible .result-icon-wrap {
+    background: var(--red-deep);
+    color: #fff;
+  }
+
+  .result-box h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .result-box.eligible h3 { color: #1A7A4A; }
+  .result-box.not-eligible h3 { color: var(--red-deep); }
+
+  /* AI Prediction Badge */
+  .ai-prediction-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(124,58,237,0.1);
+    border: 1.5px solid rgba(124,58,237,0.25);
+    border-radius: var(--radius-pill);
+    padding: 0.3rem 0.85rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #7C3AED;
+    margin-bottom: 1rem;
+  }
+
+  /* Probability Bar */
+  .probability-section {
+    background: rgba(255,255,255,0.7);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+    text-align: left;
+  }
+
+  .probability-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 0.4rem;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .probability-bar {
+    height: 10px;
+    background: var(--gray-200);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+
+  .probability-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 1s ease;
+  }
+
+  .probability-fill.high   { background: #1A7A4A; }
+  .probability-fill.medium { background: var(--gold); }
+  .probability-fill.low    { background: var(--red-deep); }
+
+  /* Reasons List */
+  .reasons-list {
+    text-align: left;
+    max-width: 480px;
+    margin: 1rem auto 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .reasons-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.88rem;
+    color: var(--gray-700);
+    background: rgba(255,255,255,0.6);
+    border-radius: var(--radius-sm);
+    padding: 0.6rem 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Days counter */
+  .days-counter {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255,255,255,0.7);
+    border-radius: var(--radius-md);
+    padding: 0.75rem 1.5rem;
+    margin: 0.75rem 0;
+  }
+
+  .days-num {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    line-height: 1;
+  }
+
+  .days-lbl {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Model info */
+  .model-info {
+    font-size: 0.72rem;
+    color: rgba(124,58,237,0.7);
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+  }
+
+  /* Try Again Buttons */
+  .btn-try-again {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: 2px solid currentColor;
+    border-radius: var(--radius-pill);
+    padding: 0.55rem 1.5rem;
+    font-weight: 600;
+    font-size: 0.88rem;
+    text-decoration: none;
+    transition: all var(--transition);
+    margin-top: 1rem;
+    cursor: pointer;
+    background: transparent;
+    font-family: var(--font-body);
+  }
+
+  .btn-try-again.green { color: #1A7A4A; border-color: #1A7A4A; }
+  .btn-try-again.green:hover { background: #1A7A4A; color: #fff; }
+
+  .btn-try-again.red { color: var(--red-deep); border-color: var(--red-deep); }
+  .btn-try-again.red:hover { background: var(--red-deep); color: #fff; }
+
+  /* Sidebar Cards */
+  .criteria-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .criteria-card h5 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--gray-900);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .criteria-card h5 i { color: var(--red-deep); }
+
+  .criteria-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid var(--gray-100);
+    font-size: 0.88rem;
+  }
+
+  .criteria-item:last-child { border-bottom: none; }
+
+  .criteria-icon {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--red-light);
+    color: var(--red-deep);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .criteria-title {
+    font-weight: 700;
+    color: var(--gray-900);
+    font-size: 0.88rem;
+  }
+
+  .criteria-desc {
+    font-size: 0.78rem;
+    color: var(--gray-500);
+  }
+
+  /* AI Info Card */
+  .ai-info-card {
+    background: linear-gradient(135deg, #7C3AED, #5B21B6);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    color: #fff;
+  }
+
+  .ai-info-card h5 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .ai-info-card p {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.82);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .ai-info-card ul {
+    color: rgba(255,255,255,0.82);
+    font-size: 0.82rem;
+    padding-left: 1.1rem;
+    margin-top: 0.5rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<div class="eligibility-hero">
+  <div class="container" style="position:relative; z-index:1;">
+    <div class="d-inline-flex align-items-center gap-2 mb-3"
+         style="background:rgba(124,58,237,0.2);
+                border:1px solid rgba(124,58,237,0.3);
+                border-radius:var(--radius-pill);
+                padding:0.3rem 0.9rem;
+                font-size:0.75rem; font-weight:700; color:#C4B5FD;
+                letter-spacing:0.06em; text-transform:uppercase;">
+      <i class="bi bi-cpu-fill"></i>
+      {% if ml_available %}AI-Powered Prediction{% else %}Eligibility Check{% endif %}
+    </div>
+    <h1>
+      <i class="bi bi-clipboard2-pulse-fill me-2"></i>
+      Donation Eligibility Check
+    </h1>
+    <p>
+      Enter your details below.
+      {% if ml_available %}
+        Our ML model will predict your eligibility with a confidence score.
+      {% else %}
+        We'll check your eligibility based on WHO donation standards.
+      {% endif %}
+    </p>
+  </div>
+</div>
+
+<div class="eligibility-page">
+  <div class="container">
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show mb-3">
+            <i class="bi bi-{{ 'check-circle-fill' if category == 'success' else 'exclamation-triangle-fill' }} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="row g-4">
+
+      <!-- Form + Result Column -->
+      <div class="col-lg-7">
+        <div class="eligibility-card">
+          <div class="eligibility-card-header">
+            <i class="bi bi-clipboard2-pulse-fill"></i>
+            <h4>Check Your Donation Eligibility</h4>
+          </div>
+
+          <div class="eligibility-form-body">
+            <form method="POST" action="{{ url_for('eligibility') }}" novalidate>
+
+              <div class="row g-3">
+
+                <!-- Age -->
+                <div class="col-md-6">
+                  <label class="form-label">
+                    Your Age <span style="color:var(--red-deep);">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="age"
+                    class="form-control"
+                    placeholder="e.g. 25"
+                    min="1" max="100"
+                    value="{{ form_data.age or '' }}"
+                    required
+                  >
+                  <div class="field-hint">Must be between 18 and 65 years</div>
+                </div>
+
+                <!-- Weight -->
+                <div class="col-md-6">
+                  <label class="form-label">
+                    Weight (kg) <span style="color:var(--red-deep);">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    name="weight"
+                    class="form-control"
+                    placeholder="e.g. 65"
+                    min="1"
+                    value="{{ form_data.weight or '' }}"
+                    required
+                  >
+                  <div class="field-hint">Minimum 50 kg required</div>
+                </div>
+
+                <!-- Last Donation Date -->
+                <div class="col-12">
+                  <label class="form-label">Last Donation Date (if any)</label>
+                  <input
+                    type="date"
+                    name="last_donated"
+                    class="form-control"
+                    value="{{ form_data.last_donated or '' }}"
+                  >
+                  <div class="field-hint">
+                    Leave blank if you have never donated. Min 90-day gap required.
+                  </div>
+                </div>
+
+                <!-- Submit -->
+                <div class="col-12">
+                  <button type="submit" class="btn-check-eligibility">
+                    <i class="bi bi-cpu-fill"></i>
+                    Check My Eligibility
+                  </button>
+                </div>
+
+              </div>
+            </form>
+
+            <!-- ════════════════════════════════════════
+                 RESULT SECTION
+            ════════════════════════════════════════ -->
+            {% if result %}
+
+            {% if result.is_eligible %}
+            <!-- ✅ ELIGIBLE -->
+            <div class="result-box eligible">
+
+              <div class="ai-prediction-badge">
+                <i class="bi bi-cpu-fill"></i>
+                {{ result.model_used if result.model_used else 'Prediction' }}
+              </div>
+
+              <div class="result-icon-wrap">
+                <i class="bi bi-check-lg"></i>
+              </div>
+
+              <h3>You're Eligible to Donate! 🩸</h3>
+              <p>
+                Based on your details, you meet all the basic requirements
+                for blood donation.
+              </p>
+
+              <!-- Probability Bar -->
+              {% if result.confidence %}
+              <div class="probability-section">
+                <div class="probability-label">
+                  <span>Eligibility Confidence</span>
+                  <span style="color:#1A7A4A; font-weight:700;">
+                    {{ result.confidence }}%
+                  </span>
+                </div>
+                <div class="probability-bar">
+                  <div class="probability-fill high"
+                       style="width:{{ result.confidence }}%;"></div>
+                </div>
+                {% if result.probability_eligible %}
+                <div style="display:flex; justify-content:space-between;
+                            font-size:0.75rem; color:var(--gray-500);
+                            margin-top:0.5rem;">
+                  <span>Eligible: {{ result.probability_eligible }}%</span>
+                  <span>Not Eligible: {{ result.probability_ineligible }}%</span>
+                </div>
+                {% endif %}
+              </div>
+              {% endif %}
+
+              <!-- Days Since Donation -->
+              {% if result.days_since_donation is not none and result.days_since_donation %}
+              <div class="days-counter">
+                <div class="days-num">{{ result.days_since_donation }}</div>
+                <div class="days-lbl">Days Since Last Donation</div>
+              </div>
+              {% endif %}
+
+              <!-- Reasons -->
+              {% if result.reasons %}
+              <ul class="reasons-list">
+                {% for reason in result.reasons %}
+                <li>{{ reason }}</li>
+                {% endfor %}
+              </ul>
+              {% endif %}
+
+              {% if result.model_used %}
+              <div class="model-info">
+                <i class="bi bi-cpu-fill"></i>
+                {{ result.model_used }}
+              </div>
+              {% endif %}
+
+              <div style="font-size:0.82rem; color:#1A7A4A; margin-top:0.75rem;">
+                <i class="bi bi-info-circle me-1"></i>
+                Preliminary check only. Confirm with medical staff before donating.
+              </div>
+
+              <div class="d-flex gap-2 justify-content-center flex-wrap">
+                <a href="{{ url_for('register') }}" class="btn-try-again green">
+                  <i class="bi bi-droplet-half"></i> Register as Donor
+                </a>
+                <button onclick="window.location.reload()"
+                        class="btn-try-again green">
+                  <i class="bi bi-arrow-repeat"></i> Check Again
+                </button>
+              </div>
+
+            </div>
+
+            {% else %}
+            <!-- ❌ NOT ELIGIBLE -->
+            <div class="result-box not-eligible">
+
+              <div class="ai-prediction-badge">
+                <i class="bi bi-cpu-fill"></i>
+                {{ result.model_used if result.model_used else 'Prediction' }}
+              </div>
+
+              <div class="result-icon-wrap">
+                <i class="bi bi-x-lg"></i>
+              </div>
+
+              <h3>Not Eligible Right Now</h3>
+              <p>
+                Based on your details, you don't currently meet all
+                the requirements for blood donation.
+              </p>
+
+              <!-- Probability Bar -->
+              {% if result.confidence %}
+              <div class="probability-section">
+                <div class="probability-label">
+                  <span>Ineligibility Confidence</span>
+                  <span style="color:var(--red-deep); font-weight:700;">
+                    {{ result.confidence }}%
+                  </span>
+                </div>
+                <div class="probability-bar">
+                  <div class="probability-fill low"
+                       style="width:{{ result.probability_ineligible if result.probability_ineligible else result.confidence }}%;"></div>
+                </div>
+                {% if result.probability_eligible %}
+                <div style="display:flex; justify-content:space-between;
+                            font-size:0.75rem; color:var(--gray-500);
+                            margin-top:0.5rem;">
+                  <span>Eligible: {{ result.probability_eligible }}%</span>
+                  <span>Not Eligible: {{ result.probability_ineligible }}%</span>
+                </div>
+                {% endif %}
+              </div>
+              {% endif %}
+
+              <!-- Days Since Donation -->
+              {% if result.days_since_donation is not none and result.days_since_donation %}
+              <div class="days-counter">
+                <div class="days-num">{{ result.days_since_donation }}</div>
+                <div class="days-lbl">Days Since Last Donation</div>
+              </div>
+              {% endif %}
+
+              <!-- Reasons -->
+              {% if result.reasons %}
+              <ul class="reasons-list">
+                {% for reason in result.reasons %}
+                <li>{{ reason }}</li>
+                {% endfor %}
+              </ul>
+              {% endif %}
+
+              {% if result.model_used %}
+              <div class="model-info">
+                <i class="bi bi-cpu-fill"></i>
+                {{ result.model_used }}
+              </div>
+              {% endif %}
+
+              <div class="d-flex gap-2 justify-content-center flex-wrap">
+                <button onclick="window.location.reload()"
+                        class="btn-try-again red">
+                  <i class="bi bi-arrow-repeat"></i> Try Again
+                </button>
+                <a href="{{ url_for('search_donor') }}"
+                   class="btn-try-again red">
+                  <i class="bi bi-search-heart"></i> Find a Donor
+                </a>
+              </div>
+
+            </div>
+            {% endif %}
+
+            {% endif %}
+            <!-- /RESULT -->
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="col-lg-5">
+
+        <!-- Criteria Card -->
+        <div class="criteria-card">
+          <h5><i class="bi bi-list-check"></i> Eligibility Criteria</h5>
+
+          <div class="criteria-item">
+            <div class="criteria-icon"><i class="bi bi-person-fill"></i></div>
+            <div>
+              <div class="criteria-title">Age Requirement</div>
+              <div class="criteria-desc">Must be between 18 and 65 years old</div>
+            </div>
+          </div>
+
+          <div class="criteria-item">
+            <div class="criteria-icon"><i class="bi bi-speedometer2"></i></div>
+            <div>
+              <div class="criteria-title">Weight Requirement</div>
+              <div class="criteria-desc">Must weigh at least 50 kg</div>
+            </div>
+          </div>
+
+          <div class="criteria-item">
+            <div class="criteria-icon"><i class="bi bi-calendar-check"></i></div>
+            <div>
+              <div class="criteria-title">Donation Gap</div>
+              <div class="criteria-desc">Minimum 90 days between donations</div>
+            </div>
+          </div>
+
+          <div class="criteria-item">
+            <div class="criteria-icon"><i class="bi bi-heart-pulse"></i></div>
+            <div>
+              <div class="criteria-title">Good Health</div>
+              <div class="criteria-desc">No fever, cold or illness at time of donation</div>
+            </div>
+          </div>
+
+          <div class="criteria-item">
+            <div class="criteria-icon"><i class="bi bi-droplet-half"></i></div>
+            <div>
+              <div class="criteria-title">Haemoglobin Level</div>
+              <div class="criteria-desc">Min 12.5 g/dL (women) / 13.0 g/dL (men)</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- AI Info Card -->
+        <div class="ai-info-card">
+          <h5><i class="bi bi-cpu-fill"></i> About AI Prediction</h5>
+          <p>
+            {% if ml_available %}
+              Our eligibility checker uses a trained
+              <strong>Random Forest ML model</strong> with
+              {{ result.confidence if result else '95+' }}%
+              accuracy on test data.
+            {% else %}
+              Our eligibility checker uses rule-based logic aligned
+              with WHO and Indian Red Cross blood donation standards.
+            {% endif %}
+            It evaluates:
+          </p>
+          <ul>
+            <li>Age eligibility (18–65 years)</li>
+            <li>Weight threshold (≥50 kg)</li>
+            <li>Donation interval (≥90 days)</li>
+            <li>Date validation</li>
+          </ul>
+          <p style="margin-top:0.75rem;">
+            <strong style="color:rgba(255,255,255,0.9);">Note:</strong>
+            Final assessment is done by medical staff at donation centers.
+          </p>
+        </div>
+
+        <!-- Quick Nav -->
+        <div class="criteria-card mt-3">
+          <h5><i class="bi bi-lightning-fill"></i> What's Next?</h5>
+          <div class="d-flex flex-column gap-2">
+            <a href="{{ url_for('register') }}"
+               style="display:flex; align-items:center; gap:0.6rem;
+                      font-size:0.88rem; font-weight:600; color:var(--red-deep);
+                      text-decoration:none; padding:0.5rem;
+                      border-radius:var(--radius-sm);"
+               onmouseover="this.style.background='var(--red-light)'"
+               onmouseout="this.style.background='transparent'">
+              <i class="bi bi-droplet-half"></i>
+              Register as a Blood Donor
+            </a>
+            <a href="{{ url_for('search_donor') }}"
+               style="display:flex; align-items:center; gap:0.6rem;
+                      font-size:0.88rem; font-weight:600; color:var(--red-deep);
+                      text-decoration:none; padding:0.5rem;
+                      border-radius:var(--radius-sm);"
+               onmouseover="this.style.background='var(--red-light)'"
+               onmouseout="this.style.background='transparent'">
+              <i class="bi bi-search-heart"></i>
+              Find a Matching Donor
+            </a>
+            <a href="{{ url_for('emergency_request') }}"
+               style="display:flex; align-items:center; gap:0.6rem;
+                      font-size:0.88rem; font-weight:600; color:var(--red-deep);
+                      text-decoration:none; padding:0.5rem;
+                      border-radius:var(--radius-sm);"
+               onmouseover="this.style.background='var(--red-light)'"
+               onmouseout="this.style.background='transparent'">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+              Submit Emergency Request
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

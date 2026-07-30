@@ -1,0 +1,624 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy — LifeLink{% endblock %}
+
+{% block extra_css %}
+<style>
+  .privacy-page {
+    background: var(--off-white);
+    padding: 3rem 0;
+    min-height: 80vh;
+  }
+
+  .privacy-hero {
+    background: linear-gradient(135deg, #C0152A 0%, #E63946 100%);
+    padding: 3rem 0;
+    margin-bottom: 2.5rem;
+    text-align: center;
+    color: #fff;
+  }
+
+  .privacy-hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .privacy-hero p {
+    color: rgba(255,255,255,0.82);
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  .privacy-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    padding: 2.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .privacy-card h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--gray-900);
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--red-light);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .privacy-card h3 i { color: var(--red-deep); }
+
+  .privacy-card p {
+    font-size: 0.92rem;
+    color: var(--gray-700);
+    line-height: 1.8;
+    margin-bottom: 0.75rem;
+  }
+
+  .privacy-card ul {
+    padding-left: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .privacy-card ul li {
+    font-size: 0.92rem;
+    color: var(--gray-700);
+    line-height: 1.8;
+    margin-bottom: 0.35rem;
+  }
+
+  .privacy-nav {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    padding: 1.5rem;
+    position: sticky;
+    top: 80px;
+  }
+
+  .privacy-nav h6 {
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gray-500);
+    margin-bottom: 0.75rem;
+  }
+
+  .privacy-nav a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--gray-700);
+    padding: 0.4rem 0.5rem;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    transition: all var(--transition);
+    margin-bottom: 0.2rem;
+  }
+
+  .privacy-nav a:hover {
+    background: var(--red-light);
+    color: var(--red-deep);
+  }
+
+  .privacy-nav a i { font-size: 0.85rem; color: var(--red-deep); }
+
+  .highlight-box {
+    background: var(--red-light);
+    border-left: 3px solid var(--red-deep);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+    font-size: 0.88rem;
+    color: var(--gray-700);
+  }
+
+  .highlight-box strong { color: var(--red-deep); }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    margin: 1rem 0;
+  }
+
+  .data-table th {
+    background: var(--gray-900);
+    color: rgba(255,255,255,0.8);
+    padding: 0.65rem 1rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .data-table td {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid var(--gray-100);
+    color: var(--gray-700);
+  }
+
+  .data-table tbody tr:last-child td { border-bottom: none; }
+  .data-table tbody tr:hover { background: var(--off-white); }
+
+  .badge-yes {
+    background: #ECFDF5;
+    color: #1A7A4A;
+    font-size: 0.72rem;
+    font-weight: 700;
+    border-radius: var(--radius-pill);
+    padding: 0.18rem 0.55rem;
+    display: inline-block;
+  }
+
+  .badge-no {
+    background: var(--red-light);
+    color: var(--red-deep);
+    font-size: 0.72rem;
+    font-weight: 700;
+    border-radius: var(--radius-pill);
+    padding: 0.18rem 0.55rem;
+    display: inline-block;
+  }
+
+  .last-updated {
+    font-size: 0.8rem;
+    color: var(--gray-500);
+    margin-bottom: 0;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<div class="privacy-hero">
+  <div class="container">
+    <div class="d-inline-flex align-items-center gap-2 mb-3"
+         style="background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25);
+                border-radius:var(--radius-pill); padding:0.3rem 1rem;
+                font-size:0.75rem; font-weight:700; letter-spacing:0.08em;
+                text-transform:uppercase; color:#fff;">
+      <i class="bi bi-shield-lock-fill"></i> Legal Document
+    </div>
+    <h1><i class="bi bi-shield-check me-2"></i>Privacy Policy</h1>
+    <p>How LifeLink collects, uses, and protects your personal information.</p>
+  </div>
+</div>
+
+<div class="privacy-page">
+  <div class="container">
+    <div class="row g-4">
+
+      <!-- Sidebar Navigation -->
+      <div class="col-lg-3 d-none d-lg-block">
+        <div class="privacy-nav">
+          <h6>On This Page</h6>
+          <a href="#overview"><i class="bi bi-info-circle"></i> Overview</a>
+          <a href="#data-collected"><i class="bi bi-database"></i> Data We Collect</a>
+          <a href="#data-use"><i class="bi bi-gear"></i> How We Use Data</a>
+          <a href="#data-sharing"><i class="bi bi-share"></i> Data Sharing</a>
+          <a href="#security"><i class="bi bi-lock"></i> Security</a>
+          <a href="#access-control"><i class="bi bi-person-badge"></i> Access Control</a>
+          <a href="#rights"><i class="bi bi-hand-index"></i> Your Rights</a>
+          <a href="#terms"><i class="bi bi-file-text"></i> Terms & Conditions</a>
+          <a href="#contact"><i class="bi bi-envelope"></i> Contact Us</a>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-lg-9">
+
+        <!-- Last Updated -->
+        <p class="last-updated mb-3">
+          <i class="bi bi-calendar3 me-1"></i>
+          Last Updated: January 2024 &nbsp;•&nbsp;
+          Effective Date: January 2024 &nbsp;•&nbsp;
+          Version: 1.0
+        </p>
+
+        <!-- Overview -->
+        <div class="privacy-card" id="overview">
+          <h3><i class="bi bi-info-circle-fill"></i> Overview</h3>
+          <p>
+            Welcome to <strong>LifeLink — Blood Donor Network</strong>. This
+            Privacy Policy explains how we collect, use, disclose, and protect
+            your personal information when you use our platform.
+          </p>
+          <p>
+            LifeLink is a final-year academic project built to connect blood
+            donors with patients in need across India. We are committed to
+            protecting your privacy and handling your data responsibly.
+          </p>
+          <div class="highlight-box">
+            <strong>⚠️ Academic Project Notice:</strong>
+            LifeLink is built as a Final Year Project and is NOT intended for
+            commercial use. All data submitted is used solely for demonstration
+            purposes within the scope of this educational project.
+          </div>
+        </div>
+
+        <!-- Data We Collect -->
+        <div class="privacy-card" id="data-collected">
+          <h3><i class="bi bi-database-fill"></i> Information We Collect</h3>
+          <p>We collect the following types of information:</p>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Data Type</th>
+                <th>What We Collect</th>
+                <th>Required?</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Account Info</strong></td>
+                <td>Username, email, password (hashed)</td>
+                <td><span class="badge-yes">Yes</span></td>
+              </tr>
+              <tr>
+                <td><strong>Personal Info</strong></td>
+                <td>Full name, phone number, city</td>
+                <td><span class="badge-yes">Yes</span></td>
+              </tr>
+              <tr>
+                <td><strong>Health Info</strong></td>
+                <td>Blood group, age, weight, last donation date</td>
+                <td><span class="badge-yes">Yes (for donors)</span></td>
+              </tr>
+              <tr>
+                <td><strong>Location Info</strong></td>
+                <td>City and state</td>
+                <td><span class="badge-yes">Yes</span></td>
+              </tr>
+              <tr>
+                <td><strong>Email Address</strong></td>
+                <td>For account identification</td>
+                <td><span class="badge-no">Optional</span></td>
+              </tr>
+              <tr>
+                <td><strong>Usage Data</strong></td>
+                <td>Pages visited, search queries</td>
+                <td><span class="badge-no">Automatic</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- How We Use Data -->
+        <div class="privacy-card" id="data-use">
+          <h3><i class="bi bi-gear-fill"></i> How We Use Your Information</h3>
+          <p>We use the information collected to:</p>
+          <ul>
+            <li>Create and manage your LifeLink donor or user account</li>
+            <li>Enable blood donor search and location-based matching</li>
+            <li>Process emergency blood requests</li>
+            <li>Check and display donation eligibility</li>
+            <li>Send important notifications about blood requests (if applicable)</li>
+            <li>Generate anonymous analytics for blood bank statistics</li>
+            <li>Improve platform features and user experience</li>
+            <li>Ensure platform security and prevent misuse</li>
+          </ul>
+          <div class="highlight-box">
+            <strong>We do NOT:</strong> Sell your data, use it for advertising,
+            share it with third parties for commercial purposes, or use it
+            beyond the scope of this project.
+          </div>
+        </div>
+
+        <!-- Data Sharing -->
+        <div class="privacy-card" id="data-sharing">
+          <h3><i class="bi bi-share-fill"></i> Information Sharing</h3>
+          <p>
+            LifeLink does not sell, trade, or share your personal information
+            with external parties. The following visibility rules apply:
+          </p>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Information</th>
+                <th>Visible To</th>
+                <th>Hidden From</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Name, Blood Group, City</td>
+                <td>Logged-in users</td>
+                <td>Public guests</td>
+              </tr>
+              <tr>
+                <td>Phone Number</td>
+                <td>Logged-in users (search results)</td>
+                <td>Public, non-users</td>
+              </tr>
+              <tr>
+                <td>Email Address</td>
+                <td>Admin only</td>
+                <td>Other users</td>
+              </tr>
+              <tr>
+                <td>Password</td>
+                <td>Never stored in plain text</td>
+                <td>Everyone (hashed)</td>
+              </tr>
+              <tr>
+                <td>Emergency Requests</td>
+                <td>Admin, Request owner</td>
+                <td>Other users</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Security -->
+        <div class="privacy-card" id="security">
+          <h3><i class="bi bi-lock-fill"></i> Data Security</h3>
+          <p>We implement the following security measures to protect your data:</p>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="d-flex gap-2">
+                <i class="bi bi-shield-check-fill text-success mt-1"></i>
+                <div>
+                  <strong style="font-size:0.88rem;">Password Hashing</strong>
+                  <p style="font-size:0.82rem; color:var(--gray-500); margin:0;">
+                    All passwords are hashed using Werkzeug's secure
+                    generate_password_hash — never stored as plain text.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex gap-2">
+                <i class="bi bi-shield-check-fill text-success mt-1"></i>
+                <div>
+                  <strong style="font-size:0.88rem;">Session Management</strong>
+                  <p style="font-size:0.82rem; color:var(--gray-500); margin:0;">
+                    Flask server-side sessions protect authenticated routes
+                    from unauthorized access.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex gap-2">
+                <i class="bi bi-shield-check-fill text-success mt-1"></i>
+                <div>
+                  <strong style="font-size:0.88rem;">Role-Based Access</strong>
+                  <p style="font-size:0.82rem; color:var(--gray-500); margin:0;">
+                    Separate user and admin roles with decorator-based
+                    access control on every route.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex gap-2">
+                <i class="bi bi-shield-check-fill text-success mt-1"></i>
+                <div>
+                  <strong style="font-size:0.88rem;">SQLite Database</strong>
+                  <p style="font-size:0.82rem; color:var(--gray-500); margin:0;">
+                    Data is stored locally in a secure SQLite database
+                    with parameterized queries to prevent SQL injection.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Access Control -->
+        <div class="privacy-card" id="access-control">
+          <h3><i class="bi bi-person-badge-fill"></i> Role-Based Access Control</h3>
+          <p>LifeLink uses two user roles with different access levels:</p>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>Guest</th>
+                <th>User</th>
+                <th>Admin</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>View Home Page</td>
+                <td><span class="badge-yes">✅</span></td>
+                <td><span class="badge-yes">✅</span></td>
+                <td><span class="badge-yes">✅</span></td>
+              </tr>
+              <tr>
+                <td>Search Donors</td>
+                <td><span class="badge-no">❌</span></td>
+                <td><span class="badge-yes">✅</span></td>
+                <td><span class="badge-yes">✅</span></td>
+              </tr>
+              <tr>
+                <td>Register as Donor</td>
+                <td><span class="badge-no">❌</span></td>
+                <td><span class="badge-yes">✅</span></td>
+                <td><span class="badge-yes">✅</span></td>
+              </tr>
+              <tr>
+                <td>Submit Emergency Request</td>
+                <td><span class="badge-no">❌</span></td>
+                <td><span class="badge-yes">✅</span></td>
+                <td><span class="badge-yes">✅</span></td>
+              </tr>
+              <tr>
+                <td>View All Donors</td>
+                <td><span class="badge-no">❌</span></td>
+                <td><span class="badge-no">❌</span></td>
+                <td><span class="badge-yes">✅</span></td>
+              </tr>
+              <tr>
+                <td>Manage Users</td>
+                <td><span class="badge-no">❌</span></td>
+                <td><span class="badge-no">❌</span></td>
+                <td><span class="badge-yes">✅</span></td>
+              </tr>
+              <tr>
+                <td>Analytics Dashboard</td>
+                <td><span class="badge-no">❌</span></td>
+                <td><span class="badge-no">❌</span></td>
+                <td><span class="badge-yes">✅</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Your Rights -->
+        <div class="privacy-card" id="rights">
+          <h3><i class="bi bi-hand-index-fill"></i> Your Rights</h3>
+          <p>As a LifeLink user, you have the following rights:</p>
+          <ul>
+            <li>
+              <strong>Right to Access:</strong>
+              View your profile and donor registration details anytime.
+            </li>
+            <li>
+              <strong>Right to Update:</strong>
+              Edit your profile information and donor details.
+            </li>
+            <li>
+              <strong>Right to Delete:</strong>
+              Request deletion of your account and all associated data
+              by contacting support@lifelink.health.
+            </li>
+            <li>
+              <strong>Right to Withdraw:</strong>
+              Mark yourself as unavailable to stop appearing in donor searches.
+            </li>
+            <li>
+              <strong>Right to Transparency:</strong>
+              This privacy policy explains exactly how your data is used.
+            </li>
+          </ul>
+        </div>
+
+        <!-- Terms & Conditions -->
+        <div class="privacy-card" id="terms">
+          <h3><i class="bi bi-file-text-fill"></i> Terms & Conditions</h3>
+
+          <p><strong>1. Acceptance of Terms</strong></p>
+          <p>
+            By using LifeLink, you agree to these Terms and Conditions.
+            If you do not agree, please do not use this platform.
+          </p>
+
+          <p><strong>2. User Responsibilities</strong></p>
+          <ul>
+            <li>Provide accurate and truthful information during registration.</li>
+            <li>Keep your login credentials secure and confidential.</li>
+            <li>Do not submit false emergency blood requests.</li>
+            <li>Do not attempt to access admin or other users' data.</li>
+            <li>Use the platform only for legitimate blood donation purposes.</li>
+          </ul>
+
+          <p><strong>3. Donor Eligibility</strong></p>
+          <ul>
+            <li>You must be 18–65 years old to register as a donor.</li>
+            <li>You must weigh at least 45 kg.</li>
+            <li>At least 90 days must have passed since your last donation.</li>
+            <li>LifeLink's eligibility check is a preliminary guide only —
+                always consult a medical professional before donating.</li>
+          </ul>
+
+          <p><strong>4. Prohibited Activities</strong></p>
+          <ul>
+            <li>Submitting false or misleading information.</li>
+            <li>Attempting to hack, scrape, or abuse the platform.</li>
+            <li>Impersonating other users or donors.</li>
+            <li>Using the platform for commercial purposes.</li>
+          </ul>
+
+          <p><strong>5. Limitation of Liability</strong></p>
+          <p>
+            LifeLink is an educational project and does not guarantee the
+            availability of donors, accuracy of medical information, or
+            outcomes of blood transfusions. Always contact emergency services
+            (112) in life-threatening situations.
+          </p>
+
+          <p><strong>6. Changes to Terms</strong></p>
+          <p>
+            We may update these terms periodically.
+            Continued use of the platform constitutes acceptance of any changes.
+          </p>
+        </div>
+
+        <!-- Contact -->
+        <div class="privacy-card" id="contact">
+          <h3><i class="bi bi-envelope-fill"></i> Contact Us</h3>
+          <p>
+            For privacy concerns, data deletion requests, or any other
+            queries related to this policy, contact us:
+          </p>
+          <div class="row g-3 mt-1">
+            <div class="col-md-4">
+              <div class="text-center p-3 rounded"
+                   style="background:var(--red-light);">
+                <i class="bi bi-envelope-fill"
+                   style="font-size:1.5rem; color:var(--red-deep);"></i>
+                <div style="font-weight:700; margin-top:0.5rem; font-size:0.88rem;">
+                  Email
+                </div>
+                <div style="font-size:0.82rem; color:var(--gray-700);">
+                  support@lifelink.health
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="text-center p-3 rounded"
+                   style="background:var(--red-light);">
+                <i class="bi bi-telephone-fill"
+                   style="font-size:1.5rem; color:var(--red-deep);"></i>
+                <div style="font-weight:700; margin-top:0.5rem; font-size:0.88rem;">
+                  Helpline
+                </div>
+                <div style="font-size:0.82rem; color:var(--gray-700);">
+                  1800-BLOOD (24/7)
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="text-center p-3 rounded"
+                   style="background:var(--red-light);">
+                <i class="bi bi-clock-fill"
+                   style="font-size:1.5rem; color:var(--red-deep);"></i>
+                <div style="font-weight:700; margin-top:0.5rem; font-size:0.88rem;">
+                  Response Time
+                </div>
+                <div style="font-size:0.82rem; color:var(--gray-700);">
+                  Within 48 hours
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Back to Home -->
+        <div class="text-center mt-2 mb-4">
+          <a href="{{ url_for('home') }}"
+             style="color:var(--red-deep); font-weight:600; font-size:0.92rem;
+                    text-decoration:none; display:inline-flex; align-items:center; gap:0.4rem;">
+            <i class="bi bi-arrow-left"></i> Back to Home
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

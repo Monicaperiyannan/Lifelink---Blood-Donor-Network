@@ -1,0 +1,302 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Update Donor — LifeLink Admin{% endblock %}
+{% block page_title %}Update Donor{% endblock %}
+{% block breadcrumb %}Donors › Update{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<div class="a-page-header">
+  <div>
+    <h2>Update Donor Details</h2>
+    <p>Search a donor by ID, then edit and save their information.</p>
+  </div>
+  <a href="{{ url_for('admin_donors') }}" class="btn-admin-secondary">
+    <i class="bi bi-arrow-left"></i> Back to All Donors
+  </a>
+</div>
+
+<!-- Search by ID -->
+<div class="a-search-bar mb-4">
+  <form method="GET" action="{{ url_for('admin_update_donor') }}">
+    <div class="row g-2 align-items-end">
+      <div class="col-md-8">
+        <label class="a-form-label">Search Donor by ID</label>
+        <input
+          type="text"
+          name="id"
+          class="a-form-control"
+          placeholder="Enter Donor ID (e.g. 1, 2, 3...)"
+          value="{{ donor_id or '' }}"
+        >
+      </div>
+      <div class="col-md-4">
+        <button type="submit" class="btn-admin-primary w-100">
+          <i class="bi bi-search"></i> Find Donor
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+{% if donor %}
+<!-- Edit Form -->
+<div class="a-card">
+  <div class="a-card-header">
+    <h5>
+      <i class="bi bi-pencil-square"></i>
+      Editing: {{ donor.full_name }}
+      <span class="b-id ms-2">#{{ donor.id }}</span>
+    </h5>
+    <span class="b-blood">{{ donor.blood_group }}</span>
+  </div>
+  <div class="a-card-body">
+    <form method="POST" action="{{ url_for('admin_update_donor') }}" novalidate>
+      <input type="hidden" name="action" value="save">
+      <input type="hidden" name="donor_id" value="{{ donor.id }}">
+
+      <div class="row g-3">
+
+        <!-- Full Name -->
+        <div class="col-md-6">
+          <label class="a-form-label">
+            Full Name <span style="color:var(--red);">*</span>
+          </label>
+          <input
+            type="text"
+            name="full_name"
+            class="a-form-control {{ 'is-invalid' if errors.full_name }}"
+            value="{{ form_data.full_name if form_data else donor.full_name }}"
+          >
+          {% if errors.full_name %}
+            <div class="a-invalid-msg">
+              <i class="bi bi-exclamation-circle"></i>{{ errors.full_name }}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Age -->
+        <div class="col-md-3">
+          <label class="a-form-label">
+            Age <span style="color:var(--red);">*</span>
+          </label>
+          <input
+            type="number"
+            name="age"
+            class="a-form-control {{ 'is-invalid' if errors.age }}"
+            min="18" max="65"
+            value="{{ form_data.age if form_data else donor.age }}"
+          >
+          {% if errors.age %}
+            <div class="a-invalid-msg">
+              <i class="bi bi-exclamation-circle"></i>{{ errors.age }}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Gender -->
+        <div class="col-md-3">
+          <label class="a-form-label">
+            Gender <span style="color:var(--red);">*</span>
+          </label>
+          {% set cur_gender = form_data.gender if form_data else donor.gender %}
+          <select name="gender"
+            class="a-form-control {{ 'is-invalid' if errors.gender }}">
+            <option value="Male"   {{ 'selected' if cur_gender == 'Male' }}>Male</option>
+            <option value="Female" {{ 'selected' if cur_gender == 'Female' }}>Female</option>
+            <option value="Other"  {{ 'selected' if cur_gender == 'Other' }}>Other</option>
+          </select>
+          {% if errors.gender %}
+            <div class="a-invalid-msg">
+              <i class="bi bi-exclamation-circle"></i>{{ errors.gender }}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Blood Group -->
+        <div class="col-md-4">
+          <label class="a-form-label">
+            Blood Group <span style="color:var(--red);">*</span>
+          </label>
+          {% set cur_bg = form_data.blood_group if form_data else donor.blood_group %}
+          <select name="blood_group"
+            class="a-form-control {{ 'is-invalid' if errors.blood_group }}">
+            {% for bg in blood_groups %}
+              <option value="{{ bg }}" {{ 'selected' if cur_bg == bg }}>
+                {{ bg }}
+              </option>
+            {% endfor %}
+          </select>
+          {% if errors.blood_group %}
+            <div class="a-invalid-msg">
+              <i class="bi bi-exclamation-circle"></i>{{ errors.blood_group }}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Weight -->
+        <div class="col-md-4">
+          <label class="a-form-label">
+            Weight (kg) <span style="color:var(--red);">*</span>
+          </label>
+          <input
+            type="number"
+            step="0.1"
+            name="weight"
+            class="a-form-control {{ 'is-invalid' if errors.weight }}"
+            value="{{ form_data.weight if form_data else donor.weight }}"
+          >
+          {% if errors.weight %}
+            <div class="a-invalid-msg">
+              <i class="bi bi-exclamation-circle"></i>{{ errors.weight }}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Last Donated -->
+        <div class="col-md-4">
+          <label class="a-form-label">Last Donation Date</label>
+          <input
+            type="date"
+            name="last_donated"
+            class="a-form-control {{ 'is-invalid' if errors.last_donated }}"
+            value="{{ form_data.last_donated if form_data else (donor.last_donated or '') }}"
+          >
+          {% if errors.last_donated %}
+            <div class="a-invalid-msg">
+              <i class="bi bi-exclamation-circle"></i>{{ errors.last_donated }}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Phone -->
+        <div class="col-md-6">
+          <label class="a-form-label">
+            Phone <span style="color:var(--red);">*</span>
+          </label>
+          <input
+            type="tel"
+            name="phone"
+            class="a-form-control {{ 'is-invalid' if errors.phone }}"
+            value="{{ form_data.phone if form_data else donor.phone }}"
+          >
+          {% if errors.phone %}
+            <div class="a-invalid-msg">
+              <i class="bi bi-exclamation-circle"></i>{{ errors.phone }}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Email -->
+        <div class="col-md-6">
+          <label class="a-form-label">Email</label>
+          <input
+            type="email"
+            name="email"
+            class="a-form-control {{ 'is-invalid' if errors.email }}"
+            value="{{ form_data.email if form_data else (donor.email or '') }}"
+          >
+          {% if errors.email %}
+            <div class="a-invalid-msg">
+              <i class="bi bi-exclamation-circle"></i>{{ errors.email }}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- City -->
+        <div class="col-md-6">
+          <label class="a-form-label">
+            City <span style="color:var(--red);">*</span>
+          </label>
+          <input
+            type="text"
+            name="city"
+            class="a-form-control {{ 'is-invalid' if errors.city }}"
+            value="{{ form_data.city if form_data else donor.city }}"
+          >
+          {% if errors.city %}
+            <div class="a-invalid-msg">
+              <i class="bi bi-exclamation-circle"></i>{{ errors.city }}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- State -->
+        <div class="col-md-6">
+          <label class="a-form-label">State</label>
+          <input
+            type="text"
+            name="state"
+            class="a-form-control"
+            value="{{ form_data.state if form_data else (donor.state or '') }}"
+          >
+        </div>
+
+        <!-- Availability Toggle -->
+        <div class="col-12">
+          <div class="d-flex align-items-center gap-2 mt-1">
+            {% set is_avail = form_data.is_available if form_data else donor.is_available %}
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="is_available"
+              name="is_available"
+              {{ 'checked' if is_avail == 1 or is_avail == 'on' }}
+              style="width:2.2em; height:1.2em; cursor:pointer;"
+            >
+            <label class="a-form-label mb-0" for="is_available">
+              Available to Donate
+            </label>
+          </div>
+        </div>
+
+      </div><!-- /row -->
+
+      <!-- Action Buttons -->
+      <div class="mt-4 d-flex align-items-center gap-3">
+        <button type="submit" class="btn-admin-primary">
+          <i class="bi bi-check-circle-fill"></i> Save Changes
+        </button>
+        <a href="{{ url_for('admin_donors') }}"
+           class="btn-admin-secondary">
+          Cancel
+        </a>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+{% elif donor_id %}
+<!-- Not Found -->
+<div class="a-card">
+  <div class="a-no-data">
+    <i class="bi bi-person-x"></i>
+    <h5>Donor Not Found</h5>
+    <p>No donor exists with ID #{{ donor_id }}. Try a different ID.</p>
+    <a href="{{ url_for('admin_donors') }}" class="btn-admin-secondary mt-3">
+      <i class="bi bi-people-fill"></i> View All Donors
+    </a>
+  </div>
+</div>
+
+{% else %}
+<!-- Initial State -->
+<div class="a-card">
+  <div class="a-no-data">
+    <i class="bi bi-pencil-square"></i>
+    <h5>Search to Edit</h5>
+    <p>Enter a Donor ID above to load their details for editing.</p>
+    <p style="font-size:0.82rem; margin-top:0.5rem;">
+      Tip: Find Donor IDs on the
+      <a href="{{ url_for('admin_donors') }}"
+         style="color:var(--red); font-weight:600;">
+        View All Donors
+      </a> page.
+    </p>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

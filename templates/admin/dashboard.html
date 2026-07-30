@@ -1,0 +1,358 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Dashboard — LifeLink Admin{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block breadcrumb %}Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- ── Stat Cards Row 1 ───────────────────── -->
+<div class="row g-3 mb-3">
+
+  <div class="col-6 col-lg-3">
+    <div class="a-stat-card">
+      <div class="a-stat-icon red"><i class="bi bi-people-fill"></i></div>
+      <div>
+        <div class="a-stat-value">{{ total_donors }}</div>
+        <div class="a-stat-label">Total Donors</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-lg-3">
+    <div class="a-stat-card">
+      <div class="a-stat-icon green"><i class="bi bi-check-circle-fill"></i></div>
+      <div>
+        <div class="a-stat-value">{{ eligible_donors }}</div>
+        <div class="a-stat-label">Eligible Donors</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-lg-3">
+    <div class="a-stat-card">
+      <div class="a-stat-icon gold"><i class="bi bi-person-fill"></i></div>
+      <div>
+        <div class="a-stat-value">{{ total_users }}</div>
+        <div class="a-stat-label">Registered Users</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-lg-3">
+    <div class="a-stat-card">
+      <div class="a-stat-icon purple"><i class="bi bi-exclamation-triangle-fill"></i></div>
+      <div>
+        <div class="a-stat-value">{{ pending_reqs }}</div>
+        <div class="a-stat-label">Pending Requests</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Stat Cards Row 2 ───────────────────── -->
+<div class="row g-3 mb-4">
+
+  <div class="col-6 col-lg-3">
+    <div class="a-stat-card">
+      <div class="a-stat-icon blue"><i class="bi bi-heart-pulse-fill"></i></div>
+      <div>
+        <div class="a-stat-value">{{ available_donors }}</div>
+        <div class="a-stat-label">Available Now</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-lg-3">
+    <div class="a-stat-card">
+      <div class="a-stat-icon dark"><i class="bi bi-geo-alt-fill"></i></div>
+      <div>
+        <div class="a-stat-value">{{ total_cities }}</div>
+        <div class="a-stat-label">Cities Covered</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-lg-3">
+    <div class="a-stat-card">
+      <div class="a-stat-icon red"><i class="bi bi-droplet-fill"></i></div>
+      <div>
+        <div class="a-stat-value">8</div>
+        <div class="a-stat-label">Blood Groups</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-6 col-lg-3">
+    <div class="a-stat-card">
+      <div class="a-stat-icon green"><i class="bi bi-percent"></i></div>
+      <div>
+        <div class="a-stat-value">{{ eligible_pct }}%</div>
+        <div class="a-stat-label">Eligible Rate</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Charts Row ─────────────────────────── -->
+<div class="row g-4 mb-4">
+
+  <!-- Blood Group Doughnut -->
+  <div class="col-lg-5">
+    <div class="a-card h-100">
+      <div class="a-card-header">
+        <h5><i class="bi bi-droplet-half"></i> Blood Group Distribution</h5>
+        <a href="{{ url_for('admin_analytics') }}" class="btn-a btn-a-view">
+          Full Report
+        </a>
+      </div>
+      <div class="a-card-body">
+        {% if total_donors > 0 %}
+        <div class="chart-wrap">
+          <canvas id="bgChart"></canvas>
+        </div>
+        {% else %}
+        <div class="a-no-data">
+          <i class="bi bi-bar-chart"></i>
+          <h5>No Data Yet</h5>
+          <p>Register donors to see distribution.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Eligibility Pie + Progress -->
+  <div class="col-lg-4">
+    <div class="a-card h-100">
+      <div class="a-card-header">
+        <h5><i class="bi bi-clipboard2-pulse"></i> Eligibility Status</h5>
+      </div>
+      <div class="a-card-body">
+        {% if total_donors > 0 %}
+        <div class="chart-wrap" style="height:180px;">
+          <canvas id="eligChart"></canvas>
+        </div>
+        <div class="mt-3">
+          <div class="d-flex justify-content-between mb-1" style="font-size:0.78rem;">
+            <span style="color:var(--green); font-weight:700;">✅ Eligible</span>
+            <span style="font-weight:700;">{{ eligible_pct }}%</span>
+          </div>
+          <div class="progress mb-2" style="height:5px; border-radius:3px;">
+            <div class="progress-bar" style="width:{{ eligible_pct }}%; background:var(--green);"></div>
+          </div>
+          <div class="d-flex justify-content-between mb-1" style="font-size:0.78rem;">
+            <span style="color:var(--red); font-weight:700;">❌ Ineligible</span>
+            <span style="font-weight:700;">{{ ineligible_pct }}%</span>
+          </div>
+          <div class="progress" style="height:5px; border-radius:3px;">
+            <div class="progress-bar" style="width:{{ ineligible_pct }}%; background:var(--red);"></div>
+          </div>
+        </div>
+        {% else %}
+        <div class="a-no-data">
+          <i class="bi bi-clipboard2"></i>
+          <h5>No Data Yet</h5>
+          <p>No donors registered.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="col-lg-3">
+    <div class="a-card h-100">
+      <div class="a-card-header">
+        <h5><i class="bi bi-lightning-fill"></i> Quick Actions</h5>
+      </div>
+      <div class="a-card-body">
+        <div class="d-flex flex-column gap-2">
+          <a href="{{ url_for('register') }}" class="btn-admin-primary">
+            <i class="bi bi-person-plus-fill"></i> Add New Donor
+          </a>
+          <a href="{{ url_for('admin_donors') }}" class="btn-admin-secondary">
+            <i class="bi bi-people-fill"></i> View All Donors
+          </a>
+          <a href="{{ url_for('admin_emergency') }}" class="btn-admin-secondary">
+            <i class="bi bi-exclamation-triangle-fill"></i> Emergency Requests
+          </a>
+          <a href="{{ url_for('admin_users') }}" class="btn-admin-secondary">
+            <i class="bi bi-person-gear"></i> Manage Users
+          </a>
+          <a href="{{ url_for('admin_analytics') }}" class="btn-admin-secondary">
+            <i class="bi bi-bar-chart-fill"></i> Full Analytics
+          </a>
+          <a href="{{ url_for('admin_export_donors') }}" class="btn-admin-secondary">
+            <i class="bi bi-download"></i> Export Donors CSV
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── City Chart + Recent Donors ─────────── -->
+<div class="row g-4">
+
+  <!-- City Bar Chart -->
+  <div class="col-lg-7">
+    <div class="a-card">
+      <div class="a-card-header">
+        <h5><i class="bi bi-geo-alt-fill"></i> Top Cities by Donor Count</h5>
+      </div>
+      <div class="a-card-body">
+        {% if city_data %}
+        <div class="chart-wrap" style="height:240px;">
+          <canvas id="cityChart"></canvas>
+        </div>
+        {% else %}
+        <div class="a-no-data">
+          <i class="bi bi-map"></i>
+          <h5>No City Data</h5>
+          <p>Register donors to see city distribution.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Donors -->
+  <div class="col-lg-5">
+    <div class="a-card">
+      <div class="a-card-header">
+        <h5><i class="bi bi-clock-history"></i> Recent Registrations</h5>
+        <a href="{{ url_for('admin_donors') }}" class="btn-a btn-a-view">View All</a>
+      </div>
+
+      {% if recent_donors %}
+      <div style="overflow-x:auto;">
+        <table class="a-table">
+          <thead>
+            <tr>
+              <th>Donor</th>
+              <th>Blood</th>
+              <th>City</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in recent_donors %}
+            <tr>
+              <td>
+                <div class="d-name-cell">
+                  <div class="d-avatar">{{ d.full_name[0]|upper }}</div>
+                  <span class="d-name">{{ d.full_name }}</span>
+                </div>
+              </td>
+              <td><span class="b-blood">{{ d.blood_group }}</span></td>
+              <td style="font-size:0.8rem; color:var(--gray-500);">{{ d.city }}</td>
+              <td>
+                <a href="{{ url_for('admin_update_donor') }}?id={{ d.id }}"
+                   class="btn-a btn-a-edit">
+                  <i class="bi bi-pencil-fill"></i>
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="a-no-data">
+        <i class="bi bi-people"></i>
+        <h5>No Donors Yet</h5>
+        <p>No donors have registered.</p>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+  const COLORS = [
+    '#C0152A','#E63946','#F5A623','#1A7A4A',
+    '#2563EB','#7C3AED','#0891B2','#D97706'
+  ];
+
+  {% if total_donors > 0 %}
+  // Blood Group Doughnut
+  new Chart(document.getElementById('bgChart'), {
+    type: 'doughnut',
+    data: {
+      labels: {{ blood_group_data.keys()|list|tojson }},
+      datasets: [{
+        data: {{ blood_group_data.values()|list|tojson }},
+        backgroundColor: COLORS,
+        borderWidth: 2,
+        borderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { font: { family: 'Inter', size: 10 }, padding: 8 }
+        }
+      }
+    }
+  });
+
+  // Eligibility Pie
+  new Chart(document.getElementById('eligChart'), {
+    type: 'pie',
+    data: {
+      labels: ['Eligible', 'Ineligible'],
+      datasets: [{
+        data: [{{ eligible_donors }}, {{ ineligible_donors }}],
+        backgroundColor: ['#1A7A4A', '#C0152A'],
+        borderWidth: 2,
+        borderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } }
+    }
+  });
+  {% endif %}
+
+  {% if city_data %}
+  // City Bar Chart
+  new Chart(document.getElementById('cityChart'), {
+    type: 'bar',
+    data: {
+      labels: {{ city_data.keys()|list|tojson }},
+      datasets: [{
+        label: 'Donors',
+        data: {{ city_data.values()|list|tojson }},
+        backgroundColor: '#C0152A',
+        borderRadius: 5,
+        maxBarThickness: 38
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1 } },
+        x: { ticks: { font: { family: 'Inter', size: 10 } } }
+      }
+    }
+  });
+  {% endif %}
+</script>
+{% endblock %}

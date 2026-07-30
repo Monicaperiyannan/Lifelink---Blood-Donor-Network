@@ -1,0 +1,192 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Delete Donor — LifeLink Admin{% endblock %}
+{% block page_title %}Delete Donor{% endblock %}
+{% block breadcrumb %}Donors › Delete{% endblock %}
+
+{% block content %}
+
+<div class="a-page-header">
+  <div>
+    <h2>Delete Donor Record</h2>
+    <p>Search by Donor ID, confirm, then permanently delete the record.</p>
+  </div>
+  <a href="{{ url_for('admin_donors') }}" class="btn-admin-secondary">
+    <i class="bi bi-arrow-left"></i> Back to All Donors
+  </a>
+</div>
+
+<!-- Search -->
+<div class="a-search-bar mb-4">
+  <form method="GET" action="{{ url_for('admin_delete_donor') }}">
+    <div class="row g-2 align-items-end">
+      <div class="col-md-8">
+        <label class="a-form-label">Search Donor by ID</label>
+        <input
+          type="text"
+          name="id"
+          class="a-form-control"
+          placeholder="Enter Donor ID (e.g. 1, 2, 3...)"
+          value="{{ donor_id or '' }}"
+        >
+      </div>
+      <div class="col-md-4">
+        <button type="submit" class="btn-admin-primary w-100">
+          <i class="bi bi-search"></i> Find Donor
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+{% if donor %}
+<!-- Donor Preview -->
+<div class="a-card">
+  <div class="a-card-header">
+    <h5>
+      <i class="bi bi-person-fill"></i>
+      {{ donor.full_name }}
+      <span class="b-id ms-2">#{{ donor.id }}</span>
+    </h5>
+    <span class="b-blood">{{ donor.blood_group }}</span>
+  </div>
+  <div class="a-card-body">
+    <div class="row g-3 mb-4">
+      <div class="col-md-3">
+        <div style="font-size:0.75rem; font-weight:700; color:var(--gray-500);
+                    text-transform:uppercase; letter-spacing:0.04em; margin-bottom:0.25rem;">
+          Age / Gender
+        </div>
+        <div style="font-size:0.9rem; color:var(--gray-900); font-weight:600;">
+          {{ donor.age }} yrs • {{ donor.gender }}
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div style="font-size:0.75rem; font-weight:700; color:var(--gray-500);
+                    text-transform:uppercase; letter-spacing:0.04em; margin-bottom:0.25rem;">
+          Phone
+        </div>
+        <div style="font-size:0.9rem; color:var(--gray-900); font-weight:600;">
+          {{ donor.phone }}
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div style="font-size:0.75rem; font-weight:700; color:var(--gray-500);
+                    text-transform:uppercase; letter-spacing:0.04em; margin-bottom:0.25rem;">
+          City
+        </div>
+        <div style="font-size:0.9rem; color:var(--gray-900); font-weight:600;">
+          {{ donor.city }}{% if donor.state %}, {{ donor.state }}{% endif %}
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div style="font-size:0.75rem; font-weight:700; color:var(--gray-500);
+                    text-transform:uppercase; letter-spacing:0.04em; margin-bottom:0.25rem;">
+          Registered On
+        </div>
+        <div style="font-size:0.9rem; color:var(--gray-900); font-weight:600;">
+          {{ donor.created_at[:10] if donor.created_at else 'N/A' }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Warning -->
+    <div class="mb-4 p-3 rounded"
+         style="background:var(--red-light); border:1.5px dashed var(--red);">
+      <div class="d-flex align-items-start gap-2"
+           style="font-size:0.88rem; color:var(--gray-700);">
+        <i class="bi bi-exclamation-triangle-fill mt-1"
+           style="color:var(--red); flex-shrink:0;"></i>
+        <span>
+          <strong>This action is permanent!</strong>
+          Once deleted, <strong>{{ donor.full_name }}</strong>'s donor record
+          cannot be recovered. All associated data will be permanently removed.
+        </span>
+      </div>
+    </div>
+
+    <!-- Delete Button -->
+    <button type="button" class="btn-admin-primary"
+            style="background:var(--red);"
+            data-bs-toggle="modal"
+            data-bs-target="#confirmDeleteModal">
+      <i class="bi bi-trash3-fill"></i> Delete This Donor
+    </button>
+  </div>
+</div>
+
+<!-- Confirm Delete Modal -->
+<div class="modal fade" id="confirmDeleteModal"
+     tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-trash3-fill me-2" style="color:var(--red);"></i>
+          Confirm Delete
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <div style="width:70px; height:70px; background:var(--red-light);
+                    border-radius:50%; display:flex; align-items:center;
+                    justify-content:center; margin:0 auto 1rem;
+                    font-size:1.8rem; color:var(--red);">
+          <i class="bi bi-trash3-fill"></i>
+        </div>
+        <h5 style="font-family:var(--font-d); font-weight:700;">
+          Delete {{ donor.full_name }}?
+        </h5>
+        <p style="font-size:0.88rem; color:var(--gray-500);">
+          Are you sure you want to permanently delete this donor record?
+          This action <strong>cannot be undone</strong>.
+        </p>
+      </div>
+      <div class="modal-footer justify-content-center border-0 pb-4">
+        <button type="button" class="btn-admin-secondary"
+                data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <form method="POST"
+              action="{{ url_for('admin_delete_donor', did=donor.id) }}"
+              style="display:inline;">
+          <button type="submit" class="btn-admin-primary"
+                  style="background:var(--red);">
+            <i class="bi bi-trash3-fill"></i> Yes, Delete
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% elif donor_id %}
+<div class="a-card">
+  <div class="a-no-data">
+    <i class="bi bi-person-x"></i>
+    <h5>Donor Not Found</h5>
+    <p>No donor with ID #{{ donor_id }}. Try a different ID.</p>
+    <a href="{{ url_for('admin_donors') }}" class="btn-admin-secondary mt-3">
+      <i class="bi bi-people-fill"></i> View All Donors
+    </a>
+  </div>
+</div>
+
+{% else %}
+<div class="a-card">
+  <div class="a-no-data">
+    <i class="bi bi-trash3"></i>
+    <h5>Search to Delete</h5>
+    <p>Enter a Donor ID above to find the record you want to remove.</p>
+    <p style="font-size:0.82rem; margin-top:0.5rem;">
+      Tip: Find Donor IDs on the
+      <a href="{{ url_for('admin_donors') }}"
+         style="color:var(--red); font-weight:600;">
+        View All Donors
+      </a> page.
+    </p>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

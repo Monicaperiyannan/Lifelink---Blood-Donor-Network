@@ -1,0 +1,286 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Manage Users — LifeLink Admin{% endblock %}
+{% block page_title %}Manage Users{% endblock %}
+{% block breadcrumb %}Users{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<div class="a-page-header">
+  <div>
+    <h2>Manage Users</h2>
+    <p>View, search, block/unblock and delete registered user accounts.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('admin_export_donors') }}" class="btn-admin-secondary">
+      <i class="bi bi-download"></i> Export Donors CSV
+    </a>
+  </div>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="a-stat-card">
+      <div class="a-stat-icon gold"><i class="bi bi-people-fill"></i></div>
+      <div>
+        <div class="a-stat-value">{{ users|length }}</div>
+        <div class="a-stat-label">Total Users</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="a-stat-card">
+      <div class="a-stat-icon green"><i class="bi bi-person-check-fill"></i></div>
+      <div>
+        <div class="a-stat-value">{{ users|selectattr('is_blocked','equalto',0)|list|length }}</div>
+        <div class="a-stat-label">Active Users</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="a-stat-card">
+      <div class="a-stat-icon red"><i class="bi bi-person-x-fill"></i></div>
+      <div>
+        <div class="a-stat-value">{{ users|selectattr('is_blocked','equalto',1)|list|length }}</div>
+        <div class="a-stat-label">Blocked Users</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="a-stat-card">
+      <div class="a-stat-icon blue"><i class="bi bi-shield-lock-fill"></i></div>
+      <div>
+        <div class="a-stat-value">1</div>
+        <div class="a-stat-label">Admins</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Search Bar -->
+<div class="a-search-bar">
+  <form method="GET" action="{{ url_for('admin_users') }}">
+    <div class="row g-2 align-items-end">
+      <div class="col-md-8">
+        <label class="a-form-label">Search Users</label>
+        <input type="text" name="search" class="a-form-control"
+          placeholder="Search by username, email, or full name..."
+          value="{{ search }}">
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn-admin-primary w-100">
+          <i class="bi bi-search"></i> Search
+        </button>
+      </div>
+      {% if search %}
+      <div class="col-md-2">
+        <a href="{{ url_for('admin_users') }}" class="btn-admin-secondary w-100">
+          <i class="bi bi-x-circle"></i> Clear
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+<!-- Users Table -->
+<div class="a-card">
+  <div class="a-card-header">
+    <h5>
+      <i class="bi bi-people-fill"></i>
+      Registered Users
+      {% if search %}
+        <span style="font-size:0.75rem; font-weight:400; color:var(--gray-500);">
+          — results for "{{ search }}"
+        </span>
+      {% endif %}
+    </h5>
+    <span style="font-size:0.8rem; color:var(--gray-500);">
+      {{ users|length }} user{{ 's' if users|length != 1 else '' }}
+    </span>
+  </div>
+
+  {% if users %}
+  <div style="overflow-x:auto;">
+    <table class="a-table">
+      <thead>
+        <tr>
+          <th>#ID</th>
+          <th>User</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Blood Group</th>
+          <th>City</th>
+          <th>Status</th>
+          <th>Profile</th>
+          <th>Joined</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td><span class="b-id">#{{ u.id }}</span></td>
+
+          <td>
+            <div class="d-name-cell">
+              <div class="d-avatar" style="background:var(--gray-900); color:#fff;">
+                {{ (u.full_name or u.username)[0]|upper }}
+              </div>
+              <div>
+                <div class="d-name">{{ u.full_name or u.username }}</div>
+                <div style="font-size:0.75rem; color:var(--gray-500);">@{{ u.username }}</div>
+              </div>
+            </div>
+          </td>
+
+          <td style="font-size:0.82rem;">
+            <i class="bi bi-envelope-fill me-1" style="color:var(--red); font-size:0.72rem;"></i>
+            {{ u.email }}
+          </td>
+
+          <td style="font-size:0.82rem;">
+            {% if u.phone %}
+              <i class="bi bi-telephone-fill me-1" style="color:var(--red); font-size:0.72rem;"></i>
+              {{ u.phone }}
+            {% else %}
+              <span style="color:var(--gray-300);">—</span>
+            {% endif %}
+          </td>
+
+          <td>
+            {% if u.blood_group %}
+              <span class="b-blood">{{ u.blood_group }}</span>
+            {% else %}
+              <span style="color:var(--gray-300); font-size:0.78rem;">Not set</span>
+            {% endif %}
+          </td>
+
+          <td style="font-size:0.82rem;">
+            {% if u.city %}
+              <i class="bi bi-geo-alt-fill me-1" style="color:var(--red); font-size:0.72rem;"></i>
+              {{ u.city }}
+            {% else %}
+              <span style="color:var(--gray-300);">—</span>
+            {% endif %}
+          </td>
+
+          <td>
+            {% if u.is_blocked %}
+              <span class="b-blocked">🚫 Blocked</span>
+            {% else %}
+              <span class="b-active">✅ Active</span>
+            {% endif %}
+          </td>
+
+          <td>
+            {% if u.profile_complete %}
+              <span class="b-active">Complete</span>
+            {% else %}
+              <span class="b-status-pending">Incomplete</span>
+            {% endif %}
+          </td>
+
+          <td style="font-size:0.75rem; color:var(--gray-500); white-space:nowrap;">
+            {{ u.created_at[:10] if u.created_at else 'N/A' }}
+          </td>
+
+          <td>
+            <div class="d-flex gap-1">
+
+              <!-- Block/Unblock -->
+              <a href="{{ url_for('admin_block_user', uid=u.id) }}"
+                 class="btn-a {{ 'btn-a-approve' if u.is_blocked else 'btn-a-block' }}"
+                 title="{{ 'Unblock' if u.is_blocked else 'Block' }}">
+                <i class="bi bi-{{ 'unlock-fill' if u.is_blocked else 'lock-fill' }}"></i>
+                {{ 'Unblock' if u.is_blocked else 'Block' }}
+              </a>
+
+              <!-- Delete -->
+              <button type="button"
+                class="btn-a btn-a-del"
+                title="Delete User"
+                data-bs-toggle="modal"
+                data-bs-target="#delUserModal{{ u.id }}">
+                <i class="bi bi-trash3-fill"></i>
+              </button>
+
+            </div>
+
+            <!-- Delete Modal -->
+            <div class="modal fade" id="delUserModal{{ u.id }}"
+                 tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered modal-sm">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" style="font-size:0.95rem;">
+                      <i class="bi bi-person-x-fill me-2" style="color:var(--red);"></i>
+                      Delete User?
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                  </div>
+                  <div class="modal-body" style="font-size:0.88rem;">
+                    Are you sure you want to permanently delete
+                    <strong>{{ u.username }}</strong>?
+                    This cannot be undone.
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn-admin-secondary"
+                            data-bs-dismiss="modal">Cancel</button>
+                    <form method="POST"
+                          action="{{ url_for('admin_delete_user', uid=u.id) }}"
+                          style="display:inline;">
+                      <button type="submit" class="btn-admin-primary"
+                              style="background:var(--red);">
+                        <i class="bi bi-trash3-fill"></i> Delete
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% else %}
+  <div class="a-no-data">
+    <i class="bi bi-people"></i>
+    <h5>
+      {% if search %}No Users Found{% else %}No Users Yet{% endif %}
+    </h5>
+    <p>
+      {% if search %}
+        No users match "{{ search }}". Try a different search.
+      {% else %}
+        No users have signed up yet.
+      {% endif %}
+    </p>
+    {% if search %}
+    <a href="{{ url_for('admin_users') }}" class="btn-admin-secondary mt-3">
+      <i class="bi bi-x-circle"></i> Clear Search
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- Security Note -->
+<div class="mt-3 p-3 rounded"
+  style="background:rgba(245,166,35,0.08); border:1px solid rgba(245,166,35,0.2);">
+  <small class="d-flex align-items-start gap-2" style="color:var(--gray-500); font-size:0.78rem;">
+    <i class="bi bi-shield-exclamation" style="color:var(--gold); flex-shrink:0; margin-top:1px;"></i>
+    Admin accounts cannot be deleted from this panel.
+    Blocking a user prevents them from logging in.
+    Deleted users lose all their data permanently.
+  </small>
+</div>
+
+{% endblock %}

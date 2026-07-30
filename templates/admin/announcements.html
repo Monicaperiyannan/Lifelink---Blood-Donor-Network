@@ -1,0 +1,249 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Announcements — LifeLink Admin{% endblock %}
+{% block page_title %}Announcements{% endblock %}
+{% block breadcrumb %}Announcements{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<div class="a-page-header">
+  <div>
+    <h2>Manage Announcements</h2>
+    <p>Create and manage announcements shown on the LifeLink home page.</p>
+  </div>
+</div>
+
+<div class="row g-4">
+
+  <!-- Create Announcement Form -->
+  <div class="col-lg-5">
+    <div class="a-card">
+      <div class="a-card-header">
+        <h5><i class="bi bi-megaphone-fill"></i> Create Announcement</h5>
+      </div>
+      <div class="a-card-body">
+        <form method="POST" action="{{ url_for('admin_announcements') }}">
+          <input type="hidden" name="action" value="create">
+
+          <div class="mb-3">
+            <label class="a-form-label">
+              Title <span style="color:var(--red);">*</span>
+            </label>
+            <input
+              type="text"
+              name="title"
+              class="a-form-control"
+              placeholder="e.g. Urgent O- Blood Required in Chennai"
+              required
+            >
+          </div>
+
+          <div class="mb-3">
+            <label class="a-form-label">
+              Content <span style="color:var(--red);">*</span>
+            </label>
+            <textarea
+              name="content"
+              class="a-form-control"
+              rows="4"
+              placeholder="Write announcement details here..."
+              required
+            ></textarea>
+          </div>
+
+          <!-- Preview note -->
+          <div class="mb-3 p-3 rounded"
+               style="background:var(--gray-50); border:1px solid var(--gray-200);
+                      font-size:0.78rem; color:var(--gray-500);">
+            <i class="bi bi-eye me-1"></i>
+            Announcements appear on the LifeLink home page for all visitors.
+            Keep them clear and concise.
+          </div>
+
+          <button type="submit" class="btn-admin-primary w-100">
+            <i class="bi bi-megaphone-fill"></i>
+            Publish Announcement
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Tips Card -->
+    <div class="a-card mt-3">
+      <div class="a-card-header">
+        <h5><i class="bi bi-lightbulb-fill"></i> Tips</h5>
+      </div>
+      <div class="a-card-body">
+        <div style="font-size:0.85rem; color:var(--gray-700);">
+          <div class="d-flex gap-2 mb-2">
+            <i class="bi bi-check-circle-fill" style="color:var(--green); flex-shrink:0; margin-top:2px;"></i>
+            <span>Use clear, urgent titles for blood requests.</span>
+          </div>
+          <div class="d-flex gap-2 mb-2">
+            <i class="bi bi-check-circle-fill" style="color:var(--green); flex-shrink:0; margin-top:2px;"></i>
+            <span>Include hospital name and contact in content.</span>
+          </div>
+          <div class="d-flex gap-2 mb-2">
+            <i class="bi bi-check-circle-fill" style="color:var(--green); flex-shrink:0; margin-top:2px;"></i>
+            <span>Only last 5 active announcements are shown.</span>
+          </div>
+          <div class="d-flex gap-2">
+            <i class="bi bi-exclamation-triangle-fill" style="color:var(--gold); flex-shrink:0; margin-top:2px;"></i>
+            <span>Delete old announcements to keep the page clean.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Announcements List -->
+  <div class="col-lg-7">
+    <div class="a-card">
+      <div class="a-card-header">
+        <h5>
+          <i class="bi bi-list-ul"></i>
+          Active Announcements
+        </h5>
+        <span style="font-size:0.8rem; color:var(--gray-500);">
+          {{ announcements|length }} / 5 slots used
+        </span>
+      </div>
+
+      {% if announcements %}
+
+      <div class="a-card-body p-0">
+        {% for ann in announcements %}
+        <div class="p-4 {{ 'border-bottom' if not loop.last }}"
+             style="border-color:var(--gray-100);">
+
+          <div class="d-flex justify-content-between align-items-start gap-3">
+            <div style="flex:1;">
+
+              <!-- Title -->
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="b-status-approved">Live</span>
+                <h6 style="font-family:var(--font-d); font-weight:700;
+                            color:var(--gray-900); margin:0; font-size:0.95rem;">
+                  {{ ann.title }}
+                </h6>
+              </div>
+
+              <!-- Content -->
+              <p style="font-size:0.85rem; color:var(--gray-700);
+                         line-height:1.6; margin:0.4rem 0;">
+                {{ ann.content }}
+              </p>
+
+              <!-- Meta -->
+              <div style="font-size:0.75rem; color:var(--gray-400); margin-top:0.5rem;">
+                <i class="bi bi-calendar3 me-1"></i>
+                Published: {{ ann.created_at[:16] if ann.created_at else 'N/A' }}
+                &nbsp;•&nbsp;
+                <span class="b-id">#{{ ann.id }}</span>
+              </div>
+
+            </div>
+
+            <!-- Delete -->
+            <div class="flex-shrink-0">
+              <button type="button"
+                class="btn-a btn-a-del"
+                data-bs-toggle="modal"
+                data-bs-target="#delAnnModal{{ ann.id }}"
+                title="Delete Announcement">
+                <i class="bi bi-trash3-fill"></i> Delete
+              </button>
+            </div>
+          </div>
+
+          <!-- Delete Modal -->
+          <div class="modal fade" id="delAnnModal{{ ann.id }}"
+               tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-sm">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" style="font-size:0.95rem;">
+                    <i class="bi bi-trash3-fill me-2" style="color:var(--red);"></i>
+                    Delete Announcement?
+                  </h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="font-size:0.88rem;">
+                  Delete <strong>"{{ ann.title }}"</strong>?
+                  It will be removed from the home page immediately.
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn-admin-secondary"
+                          data-bs-dismiss="modal">Cancel</button>
+                  <form method="POST"
+                        action="{{ url_for('admin_announcements') }}"
+                        style="display:inline;">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="ann_id" value="{{ ann.id }}">
+                    <button type="submit" class="btn-admin-primary"
+                            style="background:var(--red);">
+                      <i class="bi bi-trash3-fill"></i> Delete
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        {% endfor %}
+      </div>
+
+      {% else %}
+
+      <div class="a-no-data">
+        <i class="bi bi-megaphone"></i>
+        <h5>No Announcements Yet</h5>
+        <p>Create your first announcement using the form on the left.</p>
+      </div>
+
+      {% endif %}
+
+    </div>
+
+    <!-- Preview Card -->
+    <div class="a-card mt-3">
+      <div class="a-card-header">
+        <h5><i class="bi bi-eye"></i> How It Looks on Home Page</h5>
+      </div>
+      <div class="a-card-body">
+        {% if announcements %}
+        <div style="background:var(--gray-50); border-radius:var(--r-md);
+                    padding:1rem; border:1px solid var(--gray-200);">
+          {% for ann in announcements[:3] %}
+          <div class="d-flex align-items-start gap-2 {{ 'mb-2' if not loop.last }}"
+               style="font-size:0.85rem;">
+            <i class="bi bi-megaphone-fill"
+               style="color:var(--red); flex-shrink:0; margin-top:2px;"></i>
+            <div>
+              <strong style="color:var(--gray-900);">{{ ann.title }}</strong>
+              <div style="color:var(--gray-600); font-size:0.8rem; margin-top:1px;">
+                {{ ann.content[:80] }}{% if ann.content|length > 80 %}...{% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+          {% if announcements|length > 3 %}
+          <div style="font-size:0.75rem; color:var(--gray-400); margin-top:0.5rem;">
+            + {{ announcements|length - 3 }} more announcement{{ 's' if announcements|length - 3 != 1 else '' }}
+          </div>
+          {% endif %}
+        </div>
+        {% else %}
+        <div style="font-size:0.85rem; color:var(--gray-500); text-align:center; padding:1rem;">
+          No announcements to preview.
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

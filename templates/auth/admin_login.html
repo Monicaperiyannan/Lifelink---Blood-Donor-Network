@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login — LifeLink</title>
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🩸</text></svg>" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+
+  <style>
+    :root {
+      --red-deep:    #C0152A;
+      --red-mid:     #E63946;
+      --gold:        #F5A623;
+      --gray-900:    #111827;
+      --gray-700:    #374151;
+      --gray-500:    #6B7280;
+      --white:       #FFFFFF;
+      --font-display:'Playfair Display', Georgia, serif;
+      --font-body:   'Inter', system-ui, sans-serif;
+      --radius-sm:   0.375rem;
+      --radius-lg:   1.25rem;
+      --radius-pill: 50rem;
+      --transition:  0.22s ease;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--gray-900);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Animated background */
+    .bg-animation {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .bg-circle {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(192,21,42,0.06);
+      animation: pulse-circle 6s ease-in-out infinite;
+    }
+
+    .bg-circle:nth-child(1) { width:400px; height:400px; top:-100px; left:-100px; animation-delay:0s; }
+    .bg-circle:nth-child(2) { width:300px; height:300px; bottom:-80px; right:-80px; animation-delay:2s; }
+    .bg-circle:nth-child(3) { width:200px; height:200px; top:40%; right:10%; animation-delay:4s; }
+
+    @keyframes pulse-circle {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50%       { transform: scale(1.1); opacity: 1; }
+    }
+
+    /* Grid lines decoration */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+
+    /* Main card */
+    .admin-login-page {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 440px;
+      padding: 1.5rem;
+    }
+
+    .admin-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      overflow: hidden;
+    }
+
+    /* Top strip */
+    .admin-top-strip {
+      background: linear-gradient(90deg, var(--red-deep), var(--red-mid));
+      height: 4px;
+    }
+
+    /* Header */
+    .admin-header {
+      padding: 2.5rem 2rem 1.5rem;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .admin-logo-ring {
+      width: 76px; height: 76px;
+      border-radius: 50%;
+      background: rgba(192,21,42,0.15);
+      border: 2px solid rgba(192,21,42,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem;
+      position: relative;
+    }
+
+    .admin-logo-ring::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 1px solid rgba(192,21,42,0.15);
+    }
+
+    .admin-logo-ring i {
+      font-size: 2rem;
+      color: var(--red-mid);
+    }
+
+    .admin-portal-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(192,21,42,0.15);
+      border: 1px solid rgba(192,21,42,0.25);
+      border-radius: var(--radius-pill);
+      padding: 0.25rem 0.85rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 0.75rem;
+    }
+
+    .admin-header h1 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.3rem;
+    }
+
+    .admin-header p {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.4);
+    }
+
+    /* Body */
+    .admin-body { padding: 1.75rem 2rem; }
+
+    /* Alert */
+    .admin-alert {
+      border-radius: var(--radius-sm);
+      padding: 0.65rem 0.9rem;
+      font-size: 0.82rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .admin-alert.danger {
+      background: rgba(192,21,42,0.12);
+      border: 1px solid rgba(192,21,42,0.25);
+      color: #FFB4BB;
+    }
+
+    .admin-alert.success {
+      background: rgba(26,122,74,0.12);
+      border: 1px solid rgba(26,122,74,0.25);
+      color: #86EFAC;
+    }
+
+    /* Form */
+    .form-group { margin-bottom: 1.1rem; }
+
+    .form-group label {
+      display: block;
+      font-size: 0.73rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 0.4rem;
+    }
+
+    .input-wrap { position: relative; }
+
+    .input-wrap i {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255,255,255,0.2);
+      font-size: 0.9rem;
+    }
+
+    .admin-input {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1.5px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-sm);
+      padding: 0.7rem 0.9rem 0.7rem 2.5rem;
+      font-size: 0.9rem;
+      color: #fff;
+      font-family: var(--font-body);
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .admin-input::placeholder { color: rgba(255,255,255,0.18); }
+
+    .admin-input:focus {
+      outline: none;
+      background: rgba(255,255,255,0.06);
+      border-color: var(--red-mid);
+      box-shadow: 0 0 0 3px rgba(192,21,42,0.15);
+    }
+
+    /* Submit button */
+    .btn-admin-login {
+      width: 100%;
+      background: linear-gradient(135deg, var(--red-deep), var(--red-mid));
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 0.8rem;
+      font-weight: 700;
+      font-size: 0.92rem;
+      font-family: var(--font-body);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: opacity var(--transition), transform var(--transition);
+      margin-top: 0.5rem;
+      letter-spacing: 0.02em;
+    }
+
+    .btn-admin-login:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    /* Security notice */
+    .security-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      background: rgba(245,166,35,0.06);
+      border: 1px solid rgba(245,166,35,0.15);
+      border-radius: var(--radius-sm);
+      padding: 0.7rem 0.9rem;
+      margin-top: 1.1rem;
+      font-size: 0.76rem;
+      color: rgba(255,255,255,0.35);
+      line-height: 1.5;
+    }
+
+    .security-note i { color: var(--gold); flex-shrink: 0; margin-top: 1px; }
+
+    /* Footer */
+    .admin-footer {
+      padding: 1rem 2rem 1.5rem;
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .admin-footer a {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.3);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: color var(--transition);
+    }
+
+    .admin-footer a:hover { color: var(--red-mid); }
+
+    /* Version tag */
+    .version-tag {
+      display: flex;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+
+    .version-tag span {
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.15);
+      letter-spacing: 0.08em;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background -->
+  <div class="bg-animation">
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+  </div>
+
+  <div class="admin-login-page">
+    <div class="admin-card">
+
+      <!-- Top color strip -->
+      <div class="admin-top-strip"></div>
+
+      <!-- Header -->
+      <div class="admin-header">
+        <div class="admin-portal-badge">
+          <i class="bi bi-shield-lock-fill"></i>
+          Restricted Access
+        </div>
+        <div class="admin-logo-ring">
+          <i class="bi bi-heart-pulse-fill"></i>
+        </div>
+        <h1>LifeLink Admin</h1>
+        <p>Secure administrator portal — authorized personnel only</p>
+      </div>
+
+      <!-- Body -->
+      <div class="admin-body">
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="admin-alert {{ category }}">
+                <i class="bi bi-{{ 'check-circle-fill' if category == 'success' else 'exclamation-triangle-fill' }}"></i>
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('admin_login') }}" novalidate>
+
+          <div class="form-group">
+            <label>Admin Username</label>
+            <div class="input-wrap">
+              <i class="bi bi-person-fill"></i>
+              <input
+                type="text"
+                name="username"
+                class="admin-input"
+                placeholder="Enter admin username"
+                value="{{ form_data.username or '' }}"
+                autofocus
+                required
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Password</label>
+            <div class="input-wrap">
+              <i class="bi bi-lock-fill"></i>
+              <input
+                type="password"
+                name="password"
+                class="admin-input"
+                placeholder="Enter admin password"
+                required
+              >
+            </div>
+          </div>
+
+          <button type="submit" class="btn-admin-login">
+            <i class="bi bi-shield-check"></i>
+            Authenticate & Login
+          </button>
+
+        </form>
+
+        <div class="security-note">
+          <i class="bi bi-info-circle-fill"></i>
+          This is a restricted area. Unauthorized access attempts are
+          monitored and logged. Admin credentials required.
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="admin-footer">
+        <a href="{{ url_for('user_login') }}">
+          <i class="bi bi-arrow-left"></i>
+          Back to User Login
+        </a>
+      </div>
+
+    </div>
+
+    <div class="version-tag">
+      <span>LIFELINK ADMIN PORTAL &nbsp;•&nbsp; v3.0</span>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

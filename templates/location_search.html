@@ -1,0 +1,889 @@
+{% extends "base.html" %}
+
+{% block title %}Location-Based Donor Search — LifeLink{% endblock %}
+
+{% block extra_css %}
+<style>
+  .location-page {
+    background: var(--off-white);
+    min-height: 80vh;
+    padding: 0 0 3rem;
+  }
+
+  /* Hero */
+  .location-hero {
+    background: linear-gradient(135deg, #111827 0%, #1A0305 50%, #C0152A 100%);
+    padding: 2.5rem 0;
+    margin-bottom: 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .location-hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 250px; height: 250px;
+    background: rgba(192,21,42,0.1);
+    border-radius: 50%;
+  }
+
+  .location-hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.4rem;
+  }
+
+  .location-hero p {
+    color: rgba(255,255,255,0.72);
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  /* Search Card */
+  .search-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+
+  .search-card-header {
+    background: var(--red-deep);
+    padding: 1.25rem 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .search-card-header i { font-size: 1.3rem; color: #fff; }
+
+  .search-card-header h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    font-size: 1.1rem;
+  }
+
+  .search-card-body { padding: 1.75rem; }
+
+  .form-label {
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: var(--gray-700);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .form-select, .form-control {
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    padding: 0.7rem 0.9rem;
+    font-size: 0.92rem;
+    color: var(--gray-900);
+    transition: border-color var(--transition), box-shadow var(--transition);
+  }
+
+  .form-select:focus, .form-control:focus {
+    border-color: var(--red-deep);
+    box-shadow: 0 0 0 3px rgba(192,21,42,0.1);
+    outline: none;
+  }
+
+  .info-note {
+    background: var(--red-light);
+    border-left: 3px solid var(--red-deep);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 0.75rem 1rem;
+    font-size: 0.82rem;
+    color: var(--gray-700);
+    margin-top: 0.75rem;
+  }
+
+  .info-note i { color: var(--red-deep); }
+
+  .btn-search {
+    background: var(--red-deep);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 0.8rem;
+    font-weight: 700;
+    font-size: 0.95rem;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: background var(--transition), transform var(--transition);
+    cursor: pointer;
+    font-family: var(--font-body);
+    margin-top: 0.5rem;
+  }
+
+  .btn-search:hover {
+    background: var(--red-mid);
+    transform: translateY(-2px);
+  }
+
+  .btn-clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    width: 100%;
+    background: var(--gray-100);
+    color: var(--gray-700);
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 0.65rem;
+    font-weight: 600;
+    font-size: 0.88rem;
+    text-decoration: none;
+    transition: background var(--transition);
+    margin-top: 0.5rem;
+  }
+
+  .btn-clear:hover {
+    background: var(--gray-200);
+    color: var(--gray-900);
+  }
+
+  /* Active Filters */
+  .active-filters {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+  }
+
+  .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: var(--radius-pill);
+    padding: 0.3rem 0.85rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .filter-chip.blood {
+    background: var(--red-deep);
+    color: #fff;
+  }
+
+  .filter-chip.district {
+    background: var(--gray-900);
+    color: #fff;
+  }
+
+  .results-count {
+    font-size: 0.9rem;
+    color: var(--gray-500);
+    margin-left: auto;
+  }
+
+  .results-count strong { color: var(--gray-900); }
+
+  /* Donor Cards */
+  .donor-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    border: 1.5px solid var(--gray-100);
+    padding: 1.5rem;
+    height: 100%;
+    transition: transform var(--transition), box-shadow var(--transition),
+                border-color var(--transition);
+    position: relative;
+  }
+
+  .donor-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card);
+    border-color: var(--red-light);
+  }
+
+  .blood-group-tag {
+    position: absolute;
+    top: 1.25rem; right: 1.25rem;
+    background: var(--red-deep);
+    color: #fff;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.85rem;
+    border-radius: var(--radius-pill);
+    padding: 0.3rem 0.85rem;
+  }
+
+  .donor-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .donor-avatar {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: var(--red-light);
+    color: var(--red-deep);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .donor-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--gray-900);
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  .donor-location {
+    font-size: 0.8rem;
+    color: var(--gray-500);
+    margin: 0;
+  }
+
+  .donor-detail-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--gray-700);
+    margin-bottom: 0.45rem;
+  }
+
+  .donor-detail-row i {
+    color: var(--red-deep);
+    width: 16px;
+    text-align: center;
+    font-size: 0.82rem;
+  }
+
+  .avail-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: #ECFDF5;
+    color: #1A7A4A;
+    border-radius: var(--radius-pill);
+    padding: 0.22rem 0.65rem;
+    margin-top: 0.65rem;
+  }
+
+  .avail-badge .dot {
+    width: 6px; height: 6px;
+    background: #1A7A4A;
+    border-radius: 50%;
+  }
+
+  /* Empty State */
+  .empty-state {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 4rem 2rem;
+    text-align: center;
+    box-shadow: var(--shadow-card);
+  }
+
+  .empty-icon-wrap {
+    width: 80px; height: 80px;
+    background: var(--red-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem;
+    font-size: 2rem;
+    color: var(--red-deep);
+  }
+
+  .empty-state h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-state p {
+    font-size: 0.9rem;
+    color: var(--gray-500);
+    max-width: 400px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  .empty-suggestions {
+    background: var(--off-white);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    margin: 1.25rem auto;
+    max-width: 400px;
+    text-align: left;
+  }
+
+  .empty-suggestions ul {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+    color: var(--gray-700);
+  }
+
+  .empty-suggestions ul li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .empty-suggestions ul li i { color: var(--red-deep); }
+
+  /* Initial State */
+  .initial-state {
+    text-align: center;
+    padding: 3rem 1rem;
+  }
+
+  .initial-state i {
+    font-size: 3.5rem;
+    color: var(--red-light);
+    display: block;
+    margin-bottom: 1rem;
+  }
+
+  .initial-state p {
+    color: var(--gray-500);
+    font-size: 0.95rem;
+  }
+
+  .tn-coverage-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--off-white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-pill);
+    padding: 0.3rem 0.9rem;
+    font-size: 0.8rem;
+    color: var(--gray-700);
+    margin-top: 0.75rem;
+  }
+
+  .tn-coverage-badge i { color: var(--red-deep); }
+
+  /* District Banner */
+  .district-banner {
+    background: var(--white);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--gray-100);
+    padding: 0.85rem 1.25rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.88rem;
+    color: var(--gray-700);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+
+  .district-banner i { color: var(--red-deep); font-size: 1.1rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<div class="location-hero">
+  <div class="container" style="position:relative; z-index:1;">
+    <div class="d-inline-flex align-items-center gap-2 mb-3"
+         style="background:rgba(192,21,42,0.2); border:1px solid rgba(192,21,42,0.35);
+                border-radius:var(--radius-pill); padding:0.3rem 0.9rem;
+                font-size:0.75rem; font-weight:700; color:#FFB4BB;
+                letter-spacing:0.06em; text-transform:uppercase;">
+      <i class="bi bi-geo-alt-fill"></i> District-Based Search
+    </div>
+    <h1>
+      <i class="bi bi-geo-alt-fill me-2"></i>
+      Location-Based Donor Search
+    </h1>
+    <p>
+      Find blood donors in your Tamil Nadu district.
+      All 38 districts covered — even with no registered donors yet.
+    </p>
+  </div>
+</div>
+
+<div class="location-page">
+  <div class="container">
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show mb-3">
+            <i class="bi bi-{{ 'check-circle-fill' if category == 'success' else 'exclamation-triangle-fill' }} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- Search Card -->
+    <div class="search-card">
+      <div class="search-card-header">
+        <i class="bi bi-search-heart"></i>
+        <h4>Search Donors by Blood Group & District</h4>
+      </div>
+      <div class="search-card-body">
+        <form method="POST" action="{{ url_for('location_search') }}">
+          <div class="row g-3">
+
+            <!-- Blood Group -->
+            <div class="col-md-5">
+              <label class="form-label">
+                Blood Group
+              </label>
+              <select name="blood_group" class="form-select">
+                <option value="">Any Blood Group</option>
+                {% for bg in blood_groups %}
+                <option value="{{ bg }}"
+                  {{ 'selected' if selected_blood_group == bg }}>
+                  {{ bg }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- District -->
+            <div class="col-md-5">
+              <label class="form-label">
+                District (Tamil Nadu) <span style="color:var(--red-deep);">*</span>
+              </label>
+              <select name="district" class="form-select" required>
+                <option value="">Select a District</option>
+                {% for d in districts %}
+                <option value="{{ d }}"
+                  {{ 'selected' if selected_district == d }}>
+                  {{ d }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Search Button -->
+            <div class="col-md-2 d-flex flex-column justify-content-end">
+              <button type="submit" class="btn-search">
+                <i class="bi bi-search"></i> Search
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Info Note -->
+          <div class="info-note mt-3">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            All 38 Tamil Nadu districts are available in the dropdown above.
+            Select a district to find donors registered in that area.
+          </div>
+
+          {% if searched %}
+          <a href="{{ url_for('location_search') }}" class="btn-clear mt-3">
+            <i class="bi bi-x-circle"></i> Clear Search
+          </a>
+          {% endif %}
+
+        </form>
+      </div>
+    </div>
+
+    <!-- Results Section -->
+    {% if searched %}
+      <!-- ═══════════════════════════════════════════════
+           AI RECOMMENDATIONS SECTION
+      ════════════════════════════════════════════════ -->
+      {% if ml_available and ai_recommendations %}
+      <div class="mb-4">
+
+        <!-- AI Section Header -->
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <div style="display:inline-flex; align-items:center; gap:0.4rem;
+                      background:rgba(124,58,237,0.1);
+                      border:1.5px solid rgba(124,58,237,0.25);
+                      border-radius:var(--radius-pill);
+                      padding:0.3rem 0.9rem;
+                      font-size:0.75rem; font-weight:700; color:#7C3AED;">
+            <i class="bi bi-cpu-fill"></i> AI Recommendations
+          </div>
+          <span style="font-size:0.82rem; color:var(--gray-500);">
+            Top {{ ai_recommendations|length }} donors ranked by AI
+          </span>
+        </div>
+
+        <!-- AI Donor Cards -->
+        <div class="row g-3">
+          {% for rec in ai_recommendations %}
+          <div class="col-md-6 col-lg-4">
+            <div style="background:var(--white); border-radius:var(--radius-lg);
+                        border:2px solid rgba(124,58,237,0.25);
+                        padding:1.4rem; height:100%; position:relative;
+                        transition:transform var(--transition),
+                                   box-shadow var(--transition);
+                        box-shadow:0 2px 12px rgba(124,58,237,0.08);"
+                 onmouseover="this.style.transform='translateY(-4px)';
+                              this.style.boxShadow='0 8px 28px rgba(124,58,237,0.15)'"
+                 onmouseout="this.style.transform='translateY(0)';
+                             this.style.boxShadow='0 2px 12px rgba(124,58,237,0.08)'">
+
+              <!-- AI Score Badge -->
+              <div style="position:absolute; top:1rem; right:1rem;
+                          display:flex; flex-direction:column;
+                          align-items:center;">
+                <div style="background:rgba(124,58,237,0.1);
+                            border:1.5px solid rgba(124,58,237,0.25);
+                            border-radius:var(--radius-md);
+                            padding:0.4rem 0.65rem; text-align:center;">
+                  <div style="font-family:var(--font-display); font-weight:700;
+                               font-size:1.1rem; color:#7C3AED; line-height:1;">
+                    {{ rec.score_pct }}%
+                  </div>
+                  <div style="font-size:0.62rem; font-weight:700;
+                               color:rgba(124,58,237,0.6);
+                               text-transform:uppercase; letter-spacing:0.04em;">
+                    AI Score
+                  </div>
+                </div>
+              </div>
+
+              <!-- Rank + Level -->
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <span style="background:rgba(124,58,237,0.1);
+                             color:#7C3AED; font-size:0.68rem;
+                             font-weight:700; border-radius:var(--radius-pill);
+                             padding:0.15rem 0.55rem;">
+                  ⭐ #{{ loop.index }}
+                </span>
+                <span style="background:
+                  {% if rec.score >= 0.85 %}#ECFDF5; color:#1A7A4A;
+                  {% elif rec.score >= 0.65 %}#EFF6FF; color:#1D4ED8;
+                  {% elif rec.score >= 0.45 %}#FEF3C7; color:#92400E;
+                  {% else %}var(--gray-100); color:var(--gray-500);
+                  {% endif %}
+                  font-size:0.68rem; font-weight:700;
+                  border-radius:var(--radius-pill); padding:0.15rem 0.55rem;">
+                  {{ rec.recommendation_level }}
+                </span>
+              </div>
+
+              <!-- Donor Info -->
+              <div style="display:flex; align-items:center;
+                          gap:0.75rem; margin-bottom:0.9rem;
+                          padding-right:4rem;">
+                <div style="width:46px; height:46px; border-radius:50%;
+                            background:var(--red-light); color:var(--red-deep);
+                            display:flex; align-items:center;
+                            justify-content:center;
+                            font-family:var(--font-display); font-weight:700;
+                            font-size:1.05rem; flex-shrink:0;">
+                  {{ rec.donor.full_name[0]|upper }}
+                </div>
+                <div>
+                  <div style="font-family:var(--font-display); font-weight:700;
+                               font-size:0.98rem; color:var(--gray-900);
+                               line-height:1.2;">
+                    {{ rec.donor.full_name }}
+                  </div>
+                  <div style="font-size:0.78rem; color:var(--gray-500);">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    {{ rec.donor.city }}
+                    {% if rec.donor.state %}, {{ rec.donor.state }}{% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Blood Group + Phone -->
+              <div style="display:flex; align-items:center;
+                          gap:0.5rem; margin-bottom:0.6rem;">
+                <span style="background:var(--red-deep); color:#fff;
+                             font-family:var(--font-display); font-weight:700;
+                             font-size:0.82rem; border-radius:var(--radius-pill);
+                             padding:0.22rem 0.75rem;">
+                  {{ rec.donor.blood_group }}
+                </span>
+                <span style="font-size:0.82rem; color:var(--gray-700);">
+                  <i class="bi bi-telephone-fill me-1"
+                     style="color:var(--red-deep); font-size:0.75rem;"></i>
+                  {{ rec.donor.phone }}
+                </span>
+              </div>
+
+              <!-- Donor Details -->
+              <div style="font-size:0.8rem; color:var(--gray-700);
+                          margin-bottom:0.7rem;">
+                <i class="bi bi-person-fill me-1"
+                   style="color:var(--red-deep);"></i>
+                {{ rec.donor.age }} yrs • {{ rec.donor.gender }}
+                &nbsp;•&nbsp;
+                {{ rec.donor.weight }} kg
+              </div>
+
+              <!-- AI Reasons -->
+              <div style="background:rgba(124,58,237,0.05);
+                          border-radius:var(--radius-sm);
+                          padding:0.65rem 0.85rem;">
+                <div style="font-size:0.68rem; font-weight:700;
+                             color:#7C3AED; text-transform:uppercase;
+                             letter-spacing:0.06em; margin-bottom:0.4rem;">
+                  <i class="bi bi-cpu-fill me-1"></i>
+                  AI Reasoning
+                </div>
+                {% for reason in rec.reasons %}
+                <div style="font-size:0.75rem; color:var(--gray-700);
+                             margin-bottom:0.2rem; display:flex;
+                             align-items:flex-start; gap:0.3rem;">
+                  <span>{{ reason }}</span>
+                </div>
+                {% endfor %}
+              </div>
+
+              <!-- Confidence -->
+              <div style="margin-top:0.75rem;">
+                <div style="display:flex; justify-content:space-between;
+                             font-size:0.72rem; color:var(--gray-500);
+                             margin-bottom:0.25rem;">
+                  <span>Confidence</span>
+                  <span style="font-weight:700; color:#7C3AED;">
+                    {{ rec.confidence }}%
+                  </span>
+                </div>
+                <div style="background:var(--gray-100); border-radius:3px;
+                            height:5px; overflow:hidden;">
+                  <div style="width:{{ rec.confidence }}%;
+                              height:100%; border-radius:3px;
+                              background:linear-gradient(90deg,
+                                rgba(124,58,237,0.7), #7C3AED);">
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Divider -->
+        <div style="display:flex; align-items:center; gap:1rem;
+                    margin:1.75rem 0 1.25rem;">
+          <div style="flex:1; height:1px; background:var(--gray-200);"></div>
+          <span style="font-size:0.78rem; font-weight:700;
+                       color:var(--gray-500); text-transform:uppercase;
+                       letter-spacing:0.06em; white-space:nowrap;">
+            All Search Results
+          </span>
+          <div style="flex:1; height:1px; background:var(--gray-200);"></div>
+        </div>
+
+      </div>
+      {% endif %}
+      <!-- /AI RECOMMENDATIONS -->
+      <!-- Active Filters + Count -->
+      <div class="active-filters">
+        <span style="font-size:0.82rem; color:var(--gray-500); font-weight:600;">
+          Filters:
+        </span>
+        {% if selected_blood_group %}
+          <span class="filter-chip blood">
+            <i class="bi bi-droplet-fill"></i>
+            {{ selected_blood_group }}
+          </span>
+        {% else %}
+          <span class="filter-chip blood">All Blood Groups</span>
+        {% endif %}
+        {% if selected_district %}
+          <span class="filter-chip district">
+            <i class="bi bi-geo-alt-fill"></i>
+            {{ selected_district }}
+          </span>
+        {% endif %}
+        <span class="results-count">
+          <strong>{{ total_results }}</strong>
+          donor{{ 's' if total_results != 1 else '' }} found
+        </span>
+      </div>
+
+      {% if results %}
+
+        <!-- District Banner -->
+        {% if selected_district %}
+        <div class="district-banner">
+          <i class="bi bi-geo-alt-fill"></i>
+          Showing donors registered in
+          <strong>{{ selected_district }}</strong>, Tamil Nadu
+          {% if selected_blood_group %}
+            with blood group <strong>{{ selected_blood_group }}</strong>
+          {% endif %}.
+        </div>
+        {% endif %}
+
+        <!-- Donor Cards -->
+        <div class="row g-4">
+          {% for donor in results %}
+          <div class="col-md-6 col-lg-4">
+            <div class="donor-card">
+
+              <span class="blood-group-tag">{{ donor.blood_group }}</span>
+
+              <div class="donor-card-header">
+                <div class="donor-avatar">
+                  {{ donor.full_name[0]|upper }}
+                </div>
+                <div>
+                  <p class="donor-name">{{ donor.full_name }}</p>
+                  <p class="donor-location">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    {{ donor.city }}{% if donor.state %}, {{ donor.state }}{% endif %}
+                  </p>
+                </div>
+              </div>
+
+              <div class="donor-detail-row">
+                <i class="bi bi-person-fill"></i>
+                {{ donor.age }} yrs &nbsp;•&nbsp; {{ donor.gender }}
+              </div>
+
+              <div class="donor-detail-row">
+                <i class="bi bi-droplet-half"></i>
+                Weight: {{ donor.weight }} kg
+              </div>
+
+              <div class="donor-detail-row">
+                <i class="bi bi-telephone-fill"></i>
+                {{ donor.phone }}
+              </div>
+
+              <div class="donor-detail-row">
+                <i class="bi bi-calendar-event"></i>
+                Last donated:
+                {{ donor.last_donated if donor.last_donated else 'Never / N/A' }}
+              </div>
+
+              <span class="avail-badge">
+                <span class="dot"></span>
+                Available to Donate
+              </span>
+
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+      {% else %}
+
+        <!-- No Results -->
+        <div class="empty-state">
+          <div class="empty-icon-wrap">
+            <i class="bi bi-geo-slash"></i>
+          </div>
+          <h4>No Donors Found in This Location</h4>
+          <p>
+            {% if selected_blood_group and selected_district %}
+              No <strong>{{ selected_blood_group }}</strong> donors are
+              currently registered in <strong>{{ selected_district }}</strong>.
+            {% elif selected_district %}
+              No donors are currently registered in
+              <strong>{{ selected_district }}</strong>.
+            {% elif selected_blood_group %}
+              No <strong>{{ selected_blood_group }}</strong> donors found.
+            {% else %}
+              No donors found matching your criteria.
+            {% endif %}
+          </p>
+
+          <div class="empty-suggestions">
+            <strong style="font-size:0.85rem; color:var(--gray-900);">
+              💡 Suggestions:
+            </strong>
+            <ul>
+              <li>
+                <i class="bi bi-arrow-right-circle-fill"></i>
+                Try a nearby district
+              </li>
+              <li>
+                <i class="bi bi-arrow-right-circle-fill"></i>
+                Search without a blood group filter
+              </li>
+              <li>
+                <i class="bi bi-arrow-right-circle-fill"></i>
+                Try a compatible blood group
+              </li>
+              <li>
+                <i class="bi bi-arrow-right-circle-fill"></i>
+                Submit an emergency blood request
+              </li>
+            </ul>
+          </div>
+
+          <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="{{ url_for('location_search') }}"
+               style="display:inline-flex; align-items:center; gap:0.4rem;
+                      background:var(--red-deep); color:#fff; border:none;
+                      border-radius:var(--radius-pill); padding:0.65rem 1.5rem;
+                      font-weight:700; font-size:0.88rem; text-decoration:none;
+                      transition:background var(--transition);"
+               onmouseover="this.style.background='var(--red-mid)'"
+               onmouseout="this.style.background='var(--red-deep)'">
+              <i class="bi bi-arrow-repeat"></i> Search Again
+            </a>
+            <a href="{{ url_for('emergency_request') }}"
+               style="display:inline-flex; align-items:center; gap:0.4rem;
+                      background:transparent; color:var(--red-deep);
+                      border:2px solid var(--red-deep);
+                      border-radius:var(--radius-pill); padding:0.65rem 1.5rem;
+                      font-weight:700; font-size:0.88rem; text-decoration:none;
+                      transition:all var(--transition);"
+               onmouseover="this.style.background='var(--red-deep)'; this.style.color='#fff';"
+               onmouseout="this.style.background='transparent'; this.style.color='var(--red-deep)';">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+              Emergency Request
+            </a>
+          </div>
+        </div>
+
+      {% endif %}
+
+    {% else %}
+
+      <!-- Initial State (before search) -->
+      <div class="initial-state">
+        <i class="bi bi-geo-alt"></i>
+        <p>
+          Select a <strong>blood group</strong> (optional) and
+          <strong>district</strong> (required) above,
+          then click <strong>Search</strong> to find donors.
+        </p>
+        <div class="tn-coverage-badge">
+          <i class="bi bi-map-fill"></i>
+          Covering all 38 Tamil Nadu Districts
+        </div>
+      </div>
+
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

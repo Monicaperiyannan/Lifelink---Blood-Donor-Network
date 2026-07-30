@@ -1,0 +1,727 @@
+{% extends "base.html" %}
+
+{% block title %}Register as Donor — LifeLink{% endblock %}
+
+{% block extra_css %}
+<style>
+  .register-page {
+    background: var(--off-white);
+    min-height: 80vh;
+    padding: 0 0 3rem;
+  }
+
+  /* Hero */
+  .register-hero {
+    background: linear-gradient(135deg, #C0152A 0%, #E63946 100%);
+    padding: 2.5rem 0;
+    margin-bottom: 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .register-hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 220px; height: 220px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+  }
+
+  .register-hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.4rem;
+  }
+
+  .register-hero p {
+    color: rgba(255,255,255,0.82);
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  /* Already registered card */
+  .already-registered-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    border: 2px solid #1A7A4A;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+  }
+
+  .already-registered-icon {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: #1A7A4A;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+
+  .already-registered-card h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: #1A7A4A;
+    margin-bottom: 0.4rem;
+  }
+
+  .already-registered-card p {
+    font-size: 0.88rem;
+    color: var(--gray-700);
+    margin: 0;
+  }
+
+  /* Form Card */
+  .register-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+
+  .register-card-header {
+    background: var(--red-deep);
+    padding: 1.25rem 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .register-card-header i { font-size: 1.3rem; color: #fff; }
+
+  .register-card-header h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    font-size: 1.1rem;
+  }
+
+  .register-form-body { padding: 2rem; }
+
+  /* Section divider */
+  .form-section-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    margin: 1.5rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1.5px solid var(--gray-100);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .form-section-title i { color: var(--red-deep); }
+
+  /* Form elements */
+  .form-label {
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: var(--gray-700);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.4rem;
+  }
+
+  .required-star { color: var(--red-deep); }
+
+  .form-control, .form-select {
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    padding: 0.65rem 0.9rem;
+    font-size: 0.9rem;
+    color: var(--gray-900);
+    transition: border-color var(--transition), box-shadow var(--transition);
+    font-family: var(--font-body);
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: var(--red-deep);
+    box-shadow: 0 0 0 3px rgba(192,21,42,0.1);
+    outline: none;
+  }
+
+  .form-control.is-invalid, .form-select.is-invalid {
+    border-color: var(--red-deep);
+  }
+
+  .invalid-feedback {
+    font-size: 0.78rem;
+    color: var(--red-deep);
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .field-hint {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    margin-top: 0.25rem;
+  }
+
+  /* Submit Button */
+  .btn-register-submit {
+    background: var(--red-deep);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 0.8rem 2.5rem;
+    font-weight: 700;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background var(--transition), transform var(--transition);
+    cursor: pointer;
+    font-family: var(--font-body);
+  }
+
+  .btn-register-submit:hover {
+    background: var(--red-mid);
+    transform: translateY(-2px);
+    color: #fff;
+  }
+
+  /* Sidebar */
+  .info-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .info-card h5 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--gray-900);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .info-card h5 i { color: var(--red-deep); }
+
+  .step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    color: var(--gray-700);
+  }
+
+  .step-num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--red-deep);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .benefit-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--gray-700);
+    margin-bottom: 0.7rem;
+  }
+
+  .benefit-item i { color: #1A7A4A; margin-top: 2px; flex-shrink: 0; }
+
+  .blood-group-guide {
+    background: var(--red-light);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+  }
+
+  .blood-group-guide h6 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--red-deep);
+    margin-bottom: 0.65rem;
+  }
+
+  .bg-guide-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    color: var(--gray-700);
+    margin-bottom: 0.35rem;
+  }
+
+  .bg-tag {
+    background: var(--red-deep);
+    color: #fff;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.72rem;
+    border-radius: var(--radius-pill);
+    padding: 0.1rem 0.5rem;
+    display: inline-block;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<div class="register-hero">
+  <div class="container" style="position:relative; z-index:1;">
+    <div class="d-inline-flex align-items-center gap-2 mb-3"
+         style="background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25);
+                border-radius:var(--radius-pill); padding:0.3rem 0.9rem;
+                font-size:0.75rem; font-weight:700; color:#fff;
+                letter-spacing:0.06em; text-transform:uppercase;">
+      <i class="bi bi-droplet-half"></i> Be a Life Saver
+    </div>
+    <h1>
+      <i class="bi bi-person-plus-fill me-2"></i>
+      Register as Blood Donor
+    </h1>
+    <p>
+      Join {{ stats.total_donors if stats is defined else '1000' }}+ donors
+      already on LifeLink. Your registration takes less than 2 minutes.
+    </p>
+  </div>
+</div>
+
+<div class="register-page">
+  <div class="container">
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show mb-3">
+            <i class="bi bi-{{ 'check-circle-fill' if category == 'success' else 'exclamation-triangle-fill' }} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="row g-4">
+
+      <!-- Form Column -->
+      <div class="col-lg-8">
+
+        <!-- Already Registered Notice -->
+        {% if existing_donor %}
+        <div class="already-registered-card">
+          <div class="already-registered-icon">
+            <i class="bi bi-check-lg"></i>
+          </div>
+          <div>
+            <h4>You're Already a Registered Donor! ✅</h4>
+            <p>
+              You are registered as a <strong>{{ existing_donor.blood_group }}</strong>
+              donor in <strong>{{ existing_donor.city }}</strong>.
+              Your details are already in our system.
+              Visit your profile to view or update your donor information.
+            </p>
+            <a href="{{ url_for('user_profile') }}"
+               style="display:inline-flex; align-items:center; gap:0.4rem;
+                      color:#1A7A4A; font-weight:700; font-size:0.88rem;
+                      text-decoration:none; margin-top:0.75rem;">
+              <i class="bi bi-person-fill"></i> View My Profile →
+            </a>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Registration Form -->
+        <div class="register-card">
+          <div class="register-card-header">
+            <i class="bi bi-clipboard2-plus-fill"></i>
+            <h4>
+              {% if existing_donor %}Update Donor Information
+              {% else %}Donor Registration Form{% endif %}
+            </h4>
+          </div>
+
+          <div class="register-form-body">
+            <form method="POST" action="{{ url_for('register') }}" novalidate>
+
+              <!-- Personal Info -->
+              <div class="form-section-title">
+                <i class="bi bi-person-fill"></i> Personal Information
+              </div>
+
+              <div class="row g-3">
+
+                <!-- Full Name -->
+                <div class="col-md-6">
+                  <label class="form-label">
+                    Full Name <span class="required-star">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="full_name"
+                    class="form-control {{ 'is-invalid' if errors.full_name }}"
+                    placeholder="e.g. Karthik Raja"
+                    value="{{ form_data.full_name or '' }}"
+                    autofocus
+                  >
+                  {% if errors.full_name %}
+                  <div class="invalid-feedback">
+                    <i class="bi bi-exclamation-circle"></i>{{ errors.full_name }}
+                  </div>
+                  {% endif %}
+                </div>
+
+                <!-- Age -->
+                <div class="col-md-3">
+                  <label class="form-label">
+                    Age <span class="required-star">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="age"
+                    class="form-control {{ 'is-invalid' if errors.age }}"
+                    placeholder="18–65"
+                    min="18" max="65"
+                    value="{{ form_data.age or '' }}"
+                  >
+                  {% if errors.age %}
+                  <div class="invalid-feedback">
+                    <i class="bi bi-exclamation-circle"></i>{{ errors.age }}
+                  </div>
+                  {% else %}
+                  <div class="field-hint">18 to 65 years</div>
+                  {% endif %}
+                </div>
+
+                <!-- Gender -->
+                <div class="col-md-3">
+                  <label class="form-label">
+                    Gender <span class="required-star">*</span>
+                  </label>
+                  <select name="gender"
+                    class="form-select {{ 'is-invalid' if errors.gender }}">
+                    <option value="" {{ 'selected' if not form_data.gender }}>
+                      Select
+                    </option>
+                    <option value="Male"
+                      {{ 'selected' if form_data.gender == 'Male' }}>Male</option>
+                    <option value="Female"
+                      {{ 'selected' if form_data.gender == 'Female' }}>Female</option>
+                    <option value="Other"
+                      {{ 'selected' if form_data.gender == 'Other' }}>Other</option>
+                  </select>
+                  {% if errors.gender %}
+                  <div class="invalid-feedback">
+                    <i class="bi bi-exclamation-circle"></i>{{ errors.gender }}
+                  </div>
+                  {% endif %}
+                </div>
+
+              </div>
+
+              <!-- Health Info -->
+              <div class="form-section-title">
+                <i class="bi bi-heart-pulse-fill"></i> Health Information
+              </div>
+
+              <div class="row g-3">
+
+                <!-- Blood Group -->
+                <div class="col-md-4">
+                  <label class="form-label">
+                    Blood Group <span class="required-star">*</span>
+                  </label>
+                  <select name="blood_group"
+                    class="form-select {{ 'is-invalid' if errors.blood_group }}">
+                    <option value="" {{ 'selected' if not form_data.blood_group }}>
+                      Select Group
+                    </option>
+                    {% for bg in blood_groups %}
+                    <option value="{{ bg }}"
+                      {{ 'selected' if form_data.blood_group == bg }}>
+                      {{ bg }}
+                    </option>
+                    {% endfor %}
+                  </select>
+                  {% if errors.blood_group %}
+                  <div class="invalid-feedback">
+                    <i class="bi bi-exclamation-circle"></i>{{ errors.blood_group }}
+                  </div>
+                  {% endif %}
+                </div>
+
+                <!-- Weight -->
+                <div class="col-md-4">
+                  <label class="form-label">
+                    Weight (kg) <span class="required-star">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    name="weight"
+                    class="form-control {{ 'is-invalid' if errors.weight }}"
+                    placeholder="Min 45 kg"
+                    value="{{ form_data.weight or '' }}"
+                  >
+                  {% if errors.weight %}
+                  <div class="invalid-feedback">
+                    <i class="bi bi-exclamation-circle"></i>{{ errors.weight }}
+                  </div>
+                  {% else %}
+                  <div class="field-hint">Minimum 45 kg required</div>
+                  {% endif %}
+                </div>
+
+                <!-- Last Donation Date -->
+                <div class="col-md-4">
+                  <label class="form-label">Last Donation Date</label>
+                  <input
+                    type="date"
+                    name="last_donated"
+                    class="form-control {{ 'is-invalid' if errors.last_donated }}"
+                    value="{{ form_data.last_donated or '' }}"
+                  >
+                  {% if errors.last_donated %}
+                  <div class="invalid-feedback">
+                    <i class="bi bi-exclamation-circle"></i>{{ errors.last_donated }}
+                  </div>
+                  {% else %}
+                  <div class="field-hint">Leave blank if first time</div>
+                  {% endif %}
+                </div>
+
+              </div>
+
+              <!-- Contact Info -->
+              <div class="form-section-title">
+                <i class="bi bi-telephone-fill"></i> Contact Information
+              </div>
+
+              <div class="row g-3">
+
+                <!-- Phone -->
+                <div class="col-md-6">
+                  <label class="form-label">
+                    Phone Number <span class="required-star">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    class="form-control {{ 'is-invalid' if errors.phone }}"
+                    placeholder="10-digit mobile number"
+                    value="{{ form_data.phone or '' }}"
+                  >
+                  {% if errors.phone %}
+                  <div class="invalid-feedback">
+                    <i class="bi bi-exclamation-circle"></i>{{ errors.phone }}
+                  </div>
+                  {% else %}
+                  <div class="field-hint">
+                    <i class="bi bi-shield-lock-fill me-1"
+                       style="color:var(--green);"></i>
+                    Never shared publicly
+                  </div>
+                  {% endif %}
+                </div>
+
+                <!-- Email -->
+                <div class="col-md-6">
+                  <label class="form-label">Email Address</label>
+                  <input
+                    type="email"
+                    name="email"
+                    class="form-control {{ 'is-invalid' if errors.email }}"
+                    placeholder="you@example.com (optional)"
+                    value="{{ form_data.email or '' }}"
+                  >
+                  {% if errors.email %}
+                  <div class="invalid-feedback">
+                    <i class="bi bi-exclamation-circle"></i>{{ errors.email }}
+                  </div>
+                  {% else %}
+                  <div class="field-hint">Optional but recommended</div>
+                  {% endif %}
+                </div>
+
+              </div>
+
+              <!-- Location Info -->
+              <div class="form-section-title">
+                <i class="bi bi-geo-alt-fill"></i> Location Information
+              </div>
+
+              <div class="row g-3">
+
+                <!-- City -->
+                <div class="col-md-6">
+                  <label class="form-label">
+                    City / District <span class="required-star">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="city"
+                    class="form-control {{ 'is-invalid' if errors.city }}"
+                    placeholder="e.g. Chennai"
+                    value="{{ form_data.city or '' }}"
+                  >
+                  {% if errors.city %}
+                  <div class="invalid-feedback">
+                    <i class="bi bi-exclamation-circle"></i>{{ errors.city }}
+                  </div>
+                  {% endif %}
+                </div>
+
+                <!-- State -->
+                <div class="col-md-6">
+                  <label class="form-label">State</label>
+                  <input
+                    type="text"
+                    name="state"
+                    class="form-control"
+                    placeholder="e.g. Tamil Nadu"
+                    value="{{ form_data.state or '' }}"
+                  >
+                </div>
+
+              </div>
+
+              <!-- Warning -->
+              <div class="mt-4 p-3 rounded"
+                   style="background:var(--red-light);
+                          border:1.5px dashed var(--red-deep);">
+                <small class="d-flex align-items-start gap-2"
+                       style="color:var(--gray-700); font-size:0.82rem;">
+                  <i class="bi bi-info-circle-fill mt-1"
+                     style="color:var(--red-deep); flex-shrink:0;"></i>
+                  <span>
+                    By registering, you confirm that the information provided
+                    is accurate. False information may result in account
+                    suspension. Always consult a medical professional before
+                    donating blood.
+                  </span>
+                </small>
+              </div>
+
+              <!-- Submit -->
+              <div class="mt-4 d-flex align-items-center gap-3 flex-wrap">
+                <button type="submit" class="btn-register-submit">
+                  <i class="bi bi-heart-fill"></i>
+                  Register as Donor
+                </button>
+                <a href="{{ url_for('user_profile') }}"
+                   style="color:var(--gray-500); font-size:0.88rem;
+                          text-decoration:none; font-weight:500;">
+                  Cancel
+                </a>
+              </div>
+
+            </form>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Sidebar -->
+      <div class="col-lg-4">
+
+        <!-- Steps -->
+        <div class="info-card">
+          <h5><i class="bi bi-list-ol"></i> How It Works</h5>
+          <div class="step-item">
+            <div class="step-num">1</div>
+            <div>Fill in your personal and health details accurately.</div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">2</div>
+            <div>Submit the form — your record is saved instantly.</div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">3</div>
+            <div>
+              Patients searching for your blood group can find you.
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">4</div>
+            <div>
+              You'll be contacted by patients or the admin team.
+            </div>
+          </div>
+        </div>
+
+        <!-- Benefits -->
+        <div class="info-card">
+          <h5><i class="bi bi-star-fill"></i> Why Donate?</h5>
+          <div class="benefit-item">
+            <i class="bi bi-check-circle-fill"></i>
+            One donation can save up to 3 lives.
+          </div>
+          <div class="benefit-item">
+            <i class="bi bi-check-circle-fill"></i>
+            Blood cannot be manufactured — only donated.
+          </div>
+          <div class="benefit-item">
+            <i class="bi bi-check-circle-fill"></i>
+            Donation takes only 10–15 minutes.
+          </div>
+          <div class="benefit-item">
+            <i class="bi bi-check-circle-fill"></i>
+            Your body replenishes blood within 24 hours.
+          </div>
+          <div class="benefit-item">
+            <i class="bi bi-check-circle-fill"></i>
+            Regular donation may improve your health.
+          </div>
+        </div>
+
+        <!-- Blood Group Guide -->
+        <div class="info-card">
+          <h5><i class="bi bi-droplet-half"></i> Quick Guide</h5>
+          <div class="blood-group-guide">
+            <h6>🩸 Blood Group Compatibility</h6>
+            <div class="bg-guide-item">
+              <span><span class="bg-tag">O−</span> Universal Donor</span>
+              <span style="color:#1A7A4A; font-weight:600;">Donates to All</span>
+            </div>
+            <div class="bg-guide-item">
+              <span><span class="bg-tag">AB+</span> Universal Recipient</span>
+              <span style="color:#1A7A4A; font-weight:600;">Receives All</span>
+            </div>
+            <div class="bg-guide-item">
+              <span><span class="bg-tag">O+</span> Most Common</span>
+              <span>~38% of population</span>
+            </div>
+            <div class="bg-guide-item">
+              <span><span class="bg-tag">AB−</span> Rarest</span>
+              <span>~1% of population</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

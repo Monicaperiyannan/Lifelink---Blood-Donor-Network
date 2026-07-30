@@ -1,0 +1,732 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Analytics — LifeLink Admin{% endblock %}
+{% block page_title %}Analytics Dashboard{% endblock %}
+{% block breadcrumb %}Analytics{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Clickable stat cards */
+  .a-stat-card.clickable {
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+  }
+
+  .a-stat-card.clickable:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.13);
+  }
+
+  .a-stat-card.clickable .click-hint {
+    font-size: 0.68rem;
+    color: var(--gray-400);
+    margin-top: 0.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: color var(--t);
+  }
+
+  .a-stat-card.clickable:hover .click-hint {
+    color: var(--red);
+  }
+
+  /* ML Badge */
+  .ml-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: rgba(124,58,237,0.1);
+    border: 1.5px solid rgba(124,58,237,0.25);
+    border-radius: var(--r-pill);
+    padding: 0.22rem 0.75rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #7C3AED;
+    letter-spacing: 0.04em;
+  }
+
+  /* Forecast section */
+  .forecast-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .forecast-month-badge {
+    background: var(--gray-100);
+    color: var(--gray-700);
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: var(--r-pill);
+    padding: 0.25rem 0.75rem;
+    display: inline-block;
+  }
+
+  /* Forecast demand bar */
+  .demand-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.65rem;
+    font-size: 0.82rem;
+  }
+
+  .demand-bar-label {
+    width: 40px;
+    font-family: var(--font-d);
+    font-weight: 700;
+    color: var(--gray-900);
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  .demand-bar-wrap {
+    flex: 1;
+    background: var(--gray-100);
+    border-radius: 4px;
+    height: 10px;
+    overflow: hidden;
+  }
+
+  .demand-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--red), var(--red-mid));
+    transition: width 1s ease;
+  }
+
+  .demand-bar-val {
+    width: 32px;
+    font-weight: 700;
+    color: var(--gray-700);
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* Model info */
+  .model-info-strip {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    padding: 0.5rem 0;
+    border-top: 1px solid var(--gray-100);
+    margin-top: 0.75rem;
+  }
+
+  .model-info-strip i { color: #7C3AED; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<div class="a-page-header">
+  <div>
+    <h2>Analytics Dashboard</h2>
+    <p>
+      Blood group distribution, district-wise stats,
+      monthly registrations, eligibility insights
+      {% if ml_available %}
+        and <span style="color:#7C3AED; font-weight:700;">AI demand forecasting</span>.
+      {% endif %}
+    </p>
+  </div>
+  <div class="d-flex gap-2 flex-wrap">
+    {% if ml_available %}
+    <span class="ml-badge">
+      <i class="bi bi-cpu-fill"></i> ML Models Active
+    </span>
+    {% endif %}
+    <a href="{{ url_for('admin_export_donors') }}"
+       class="btn-admin-secondary">
+      <i class="bi bi-file-earmark-spreadsheet"></i> Export Donors
+    </a>
+    <a href="{{ url_for('admin_export_emergency') }}"
+       class="btn-admin-secondary">
+      <i class="bi bi-file-earmark-spreadsheet"></i> Export Emergency
+    </a>
+  </div>
+</div>
+
+<!-- ── Clickable Summary Cards ─────────────────────────── -->
+<div class="row g-3 mb-4">
+
+  <!-- Total Donors -->
+  <div class="col-6 col-md-3">
+    <a href="{{ url_for('admin_donors_filter') }}?type=all"
+       class="a-stat-card clickable">
+      <div class="a-stat-icon red">
+        <i class="bi bi-people-fill"></i>
+      </div>
+      <div>
+        <div class="a-stat-value">{{ total_donors }}</div>
+        <div class="a-stat-label">Total Donors</div>
+        <div class="click-hint">
+          <i class="bi bi-box-arrow-up-right"></i> View All
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Eligible Donors -->
+  <div class="col-6 col-md-3">
+    <a href="{{ url_for('admin_donors_filter') }}?type=eligible"
+       class="a-stat-card clickable">
+      <div class="a-stat-icon green">
+        <i class="bi bi-check-circle-fill"></i>
+      </div>
+      <div>
+        <div class="a-stat-value">{{ eligible_donors }}</div>
+        <div class="a-stat-label">Eligible Donors</div>
+        <div class="click-hint">
+          <i class="bi bi-box-arrow-up-right"></i> View List
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Ineligible Donors -->
+  <div class="col-6 col-md-3">
+    <a href="{{ url_for('admin_donors_filter') }}?type=ineligible"
+       class="a-stat-card clickable">
+      <div class="a-stat-icon red">
+        <i class="bi bi-x-circle-fill"></i>
+      </div>
+      <div>
+        <div class="a-stat-value">{{ ineligible_donors }}</div>
+        <div class="a-stat-label">Ineligible Donors</div>
+        <div class="click-hint">
+          <i class="bi bi-box-arrow-up-right"></i> View List
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Available Donors -->
+  <div class="col-6 col-md-3">
+    <a href="{{ url_for('admin_donors_filter') }}?type=available"
+       class="a-stat-card clickable">
+      <div class="a-stat-icon blue">
+        <i class="bi bi-heart-pulse-fill"></i>
+      </div>
+      <div>
+        <div class="a-stat-value">{{ available_donors }}</div>
+        <div class="a-stat-label">Available Now</div>
+        <div class="click-hint">
+          <i class="bi bi-box-arrow-up-right"></i> View List
+        </div>
+      </div>
+    </a>
+  </div>
+
+</div>
+
+<!-- ── Charts Row 1 ─────────────────────────────────────── -->
+<div class="row g-4 mb-4">
+
+  <!-- Blood Group Bar -->
+  <div class="col-lg-7">
+    <div class="a-card h-100">
+      <div class="a-card-header">
+        <h5><i class="bi bi-bar-chart-fill"></i> Donors by Blood Group</h5>
+      </div>
+      <div class="a-card-body">
+        {% if total_donors > 0 %}
+        <div class="chart-wrap" style="height:300px;">
+          <canvas id="bgBarChart"></canvas>
+        </div>
+        {% else %}
+        <div class="a-no-data">
+          <i class="bi bi-bar-chart"></i>
+          <h5>No Data</h5>
+          <p>Register donors to see blood group distribution.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Blood Group Doughnut -->
+  <div class="col-lg-5">
+    <div class="a-card h-100">
+      <div class="a-card-header">
+        <h5><i class="bi bi-pie-chart-fill"></i> Blood Group Share</h5>
+      </div>
+      <div class="a-card-body">
+        {% if total_donors > 0 %}
+        <div class="chart-wrap" style="height:260px;">
+          <canvas id="bgDoughnutChart"></canvas>
+        </div>
+        {% else %}
+        <div class="a-no-data">
+          <i class="bi bi-pie-chart"></i>
+          <h5>No Data</h5>
+          <p>No donors registered yet.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Charts Row 2 ─────────────────────────────────────── -->
+<div class="row g-4 mb-4">
+
+  <!-- Monthly Registrations -->
+  <div class="col-lg-8">
+    <div class="a-card h-100">
+      <div class="a-card-header">
+        <h5>
+          <i class="bi bi-graph-up"></i>
+          Monthly Donor Registrations
+        </h5>
+      </div>
+      <div class="a-card-body">
+        {% if monthly_data %}
+        <div class="chart-wrap" style="height:280px;">
+          <canvas id="monthlyChart"></canvas>
+        </div>
+        {% else %}
+        <div class="a-no-data">
+          <i class="bi bi-graph-up"></i>
+          <h5>No Monthly Data</h5>
+          <p>No donors registered yet.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Eligibility Pie -->
+  <div class="col-lg-4">
+    <div class="a-card h-100">
+      <div class="a-card-header">
+        <h5><i class="bi bi-clipboard2-pulse"></i> Eligibility Overview</h5>
+      </div>
+      <div class="a-card-body">
+        {% if total_donors > 0 %}
+        <div class="chart-wrap" style="height:200px;">
+          <canvas id="eligPieChart"></canvas>
+        </div>
+        <div class="mt-3">
+          <div class="d-flex justify-content-between mb-1"
+               style="font-size:0.8rem;">
+            <span style="color:var(--green); font-weight:700;">
+              <i class="bi bi-circle-fill me-1"
+                 style="font-size:0.5rem;"></i>Eligible
+            </span>
+            <span style="font-weight:700;">
+              {{ eligible_donors }} ({{ eligible_pct }}%)
+            </span>
+          </div>
+          <div class="progress mb-2" style="height:5px; border-radius:3px;">
+            <div class="progress-bar"
+                 style="width:{{ eligible_pct }}%;
+                        background:var(--green);"></div>
+          </div>
+          <div class="d-flex justify-content-between mb-1"
+               style="font-size:0.8rem;">
+            <span style="color:var(--red); font-weight:700;">
+              <i class="bi bi-circle-fill me-1"
+                 style="font-size:0.5rem;"></i>Ineligible
+            </span>
+            <span style="font-weight:700;">
+              {{ ineligible_donors }} ({{ ineligible_pct }}%)
+            </span>
+          </div>
+          <div class="progress" style="height:5px; border-radius:3px;">
+            <div class="progress-bar"
+                 style="width:{{ ineligible_pct }}%;
+                        background:var(--red);"></div>
+          </div>
+        </div>
+        {% else %}
+        <div class="a-no-data">
+          <i class="bi bi-clipboard2"></i>
+          <h5>No Data</h5>
+          <p>No donors registered yet.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── District Chart ────────────────────────────────────── -->
+<div class="row g-4 mb-4">
+  <div class="col-12">
+    <div class="a-card">
+      <div class="a-card-header">
+        <h5>
+          <i class="bi bi-geo-alt-fill"></i>
+          District-wise Donor Distribution (Top 10)
+        </h5>
+      </div>
+      <div class="a-card-body">
+        {% if city_data %}
+        <div class="chart-wrap" style="height:300px;">
+          <canvas id="districtChart"></canvas>
+        </div>
+        {% else %}
+        <div class="a-no-data">
+          <i class="bi bi-map"></i>
+          <h5>No District Data</h5>
+          <p>No donor city data available yet.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── AI Blood Demand Forecasting ─────────────────────── -->
+{% if ml_available and forecast %}
+<div class="row g-4 mb-4">
+
+  <!-- Blood Group Forecast -->
+  <div class="col-lg-6">
+    <div class="a-card">
+      <div class="a-card-header">
+        <div class="forecast-header">
+          <h5>
+            <i class="bi bi-cpu-fill" style="color:#7C3AED;"></i>
+            AI Blood Demand Forecast
+          </h5>
+          <span class="ml-badge">
+            <i class="bi bi-cpu-fill"></i> ML Prediction
+          </span>
+          <span class="forecast-month-badge">
+            {{ forecast.forecast_month }}
+          </span>
+        </div>
+      </div>
+      <div class="a-card-body">
+        <p style="font-size:0.82rem; color:var(--gray-500); margin-bottom:1.25rem;">
+          Predicted blood unit demand by blood group for next month,
+          based on registration trends and emergency patterns.
+        </p>
+
+        {% set max_demand = forecast.blood_group_demand.values()|list|max %}
+        {% for bg, demand in forecast.blood_group_demand.items() %}
+        <div class="demand-bar-row">
+          <div class="demand-bar-label">{{ bg }}</div>
+          <div class="demand-bar-wrap">
+            <div class="demand-bar-fill"
+                 style="width:{{ (demand / max_demand * 100)|round(1) }}%;">
+            </div>
+          </div>
+          <div class="demand-bar-val">{{ demand }}</div>
+        </div>
+        {% endfor %}
+
+        <div class="model-info-strip">
+          <i class="bi bi-cpu-fill"></i>
+          Model: {{ forecast.model_used }} &nbsp;•&nbsp;
+          Total Predicted Demand: <strong>{{ forecast.total_demand }} units</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- District Forecast Chart -->
+  <div class="col-lg-6">
+    <div class="a-card">
+      <div class="a-card-header">
+        <h5>
+          <i class="bi bi-geo-alt-fill" style="color:#7C3AED;"></i>
+          District-wise Demand Forecast
+        </h5>
+        <span class="ml-badge">
+          <i class="bi bi-cpu-fill"></i> ML Prediction
+        </span>
+      </div>
+      <div class="a-card-body">
+        <div class="chart-wrap" style="height:300px;">
+          <canvas id="forecastDistrictChart"></canvas>
+        </div>
+        <div class="model-info-strip">
+          <i class="bi bi-cpu-fill"></i>
+          Forecasted for {{ forecast.forecast_month }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% elif not ml_available %}
+<!-- ML Not Available notice -->
+<div class="a-card mb-4">
+  <div class="a-card-body">
+    <div class="d-flex align-items-center gap-3 p-2">
+      <div style="width:48px; height:48px; background:rgba(124,58,237,0.1);
+                  border-radius:50%; display:flex; align-items:center;
+                  justify-content:center; font-size:1.3rem; color:#7C3AED;
+                  flex-shrink:0;">
+        <i class="bi bi-cpu"></i>
+      </div>
+      <div>
+        <div style="font-weight:700; color:var(--gray-900); margin-bottom:0.25rem;">
+          AI Forecasting Not Available
+        </div>
+        <div style="font-size:0.85rem; color:var(--gray-500);">
+          Run the ML training scripts to enable AI demand forecasting.
+          <code style="font-size:0.78rem; background:var(--gray-100);
+                       padding:0.1rem 0.4rem; border-radius:3px;">
+            python ml/generate_dataset.py
+          </code>
+          then
+          <code style="font-size:0.78rem; background:var(--gray-100);
+                       padding:0.1rem 0.4rem; border-radius:3px;">
+            python ml/train_forecasting.py
+          </code>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ── Blood Group Stats Table ───────────────────────────── -->
+<div class="a-card">
+  <div class="a-card-header">
+    <h5><i class="bi bi-table"></i> Blood Group Statistics Table</h5>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="a-table">
+      <thead>
+        <tr>
+          <th>Blood Group</th>
+          <th>Total Donors</th>
+          <th>Percentage</th>
+          <th>Distribution</th>
+          {% if ml_available and forecast %}
+          <th>Predicted Demand</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for bg, count in blood_group_data.items() %}
+        <tr>
+          <td><span class="b-blood">{{ bg }}</span></td>
+          <td style="font-weight:700; color:var(--gray-900);">
+            {{ count }}
+          </td>
+          <td style="font-weight:600;">
+            {% if total_donors > 0 %}
+              {{ "%.1f"|format(count / total_donors * 100) }}%
+            {% else %}0%{% endif %}
+          </td>
+          <td style="min-width:180px;">
+            {% if total_donors > 0 %}
+            <div class="progress" style="height:7px; border-radius:4px;">
+              <div class="progress-bar"
+                   style="width:{{ (count / total_donors * 100)|round(1) }}%;
+                          background:var(--red); border-radius:4px;">
+              </div>
+            </div>
+            {% endif %}
+          </td>
+          {% if ml_available and forecast %}
+          <td>
+            <span style="font-size:0.82rem; font-weight:700;
+                         color:#7C3AED;">
+              {{ forecast.blood_group_demand.get(bg, '—') }}
+              {% if forecast.blood_group_demand.get(bg) %}
+                <span style="font-weight:400; color:var(--gray-500);">
+                  units
+                </span>
+              {% endif %}
+            </span>
+          </td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+  const COLORS = [
+    '#C0152A','#E63946','#F5A623','#1A7A4A',
+    '#2563EB','#7C3AED','#0891B2','#D97706'
+  ];
+
+  {% if total_donors > 0 %}
+
+  // Blood Group Bar
+  new Chart(document.getElementById('bgBarChart'), {
+    type: 'bar',
+    data: {
+      labels: {{ blood_group_data.keys()|list|tojson }},
+      datasets: [{
+        label: 'Donors',
+        data:   {{ blood_group_data.values()|list|tojson }},
+        backgroundColor: COLORS,
+        borderRadius: 6,
+        maxBarThickness: 48
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1 } },
+        x: { ticks: { font: { family:'Inter', size:11 } } }
+      }
+    }
+  });
+
+  // Blood Group Doughnut
+  new Chart(document.getElementById('bgDoughnutChart'), {
+    type: 'doughnut',
+    data: {
+      labels: {{ blood_group_data.keys()|list|tojson }},
+      datasets: [{
+        data: {{ blood_group_data.values()|list|tojson }},
+        backgroundColor: COLORS,
+        borderWidth: 2,
+        borderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { font: { family:'Inter', size:10 }, padding:8 }
+        }
+      }
+    }
+  });
+
+  // Eligibility Pie
+  new Chart(document.getElementById('eligPieChart'), {
+    type: 'pie',
+    data: {
+      labels: ['Eligible','Ineligible'],
+      datasets: [{
+        data: [{{ eligible_donors }}, {{ ineligible_donors }}],
+        backgroundColor: ['#1A7A4A','#C0152A'],
+        borderWidth: 2,
+        borderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  {% endif %}
+
+  {% if monthly_data %}
+  // Monthly Line Chart
+  new Chart(document.getElementById('monthlyChart'), {
+    type: 'line',
+    data: {
+      labels: {{ monthly_data.keys()|list|tojson }},
+      datasets: [{
+        label: 'New Donors',
+        data:   {{ monthly_data.values()|list|tojson }},
+        borderColor: '#C0152A',
+        backgroundColor: 'rgba(192,21,42,0.08)',
+        borderWidth: 2.5,
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#C0152A',
+        pointRadius: 4,
+        pointHoverRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1 } },
+        x: { ticks: { font: { family:'Inter', size:10 } } }
+      }
+    }
+  });
+  {% endif %}
+
+  {% if city_data %}
+  // District Bar Chart
+  new Chart(document.getElementById('districtChart'), {
+    type: 'bar',
+    data: {
+      labels: {{ city_data.keys()|list|tojson }},
+      datasets: [{
+        label: 'Donors',
+        data:   {{ city_data.values()|list|tojson }},
+        backgroundColor: 'rgba(192,21,42,0.85)',
+        borderRadius: 5,
+        maxBarThickness: 44
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1 } },
+        x: { ticks: { font: { family:'Inter', size:10 } } }
+      }
+    }
+  });
+  {% endif %}
+
+  {% if ml_available and forecast and forecast.district_demand %}
+  // Forecast District Chart
+  const fDistLabels = {{ forecast.district_demand.keys()|list|tojson }};
+  const fDistVals   = {{ forecast.district_demand.values()|list|tojson }};
+
+  new Chart(document.getElementById('forecastDistrictChart'), {
+    type: 'bar',
+    data: {
+      labels: fDistLabels,
+      datasets: [{
+        label: 'Predicted Demand (units)',
+        data:   fDistVals,
+        backgroundColor: 'rgba(124,58,237,0.75)',
+        borderRadius: 5,
+        maxBarThickness: 38
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.raw} units predicted`
+          }
+        }
+      },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 5 } },
+        x: { ticks: { font: { family:'Inter', size:9 },
+                      maxRotation: 45 } }
+      }
+    }
+  });
+  {% endif %}
+</script>
+{% endblock %}
